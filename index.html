@@ -488,14 +488,28 @@
       .month-title { font-size: 26px; }
     }
     @media (max-width: 600px) {
-      /* Sur mobile : chips cachés, dots visibles */
+      /* Plein écran */
+      .cal-section {
+        padding: 10px 8px;
+        display: flex; flex-direction: column;
+        height: 100%; overflow: hidden;
+      }
+      .month-nav { flex-shrink: 0; margin-bottom: 8px; }
+      .cal-grid {
+        flex: 1; min-height: 0;
+        align-content: stretch;
+        gap: 3px;
+      }
+      .cal-hd { padding: 5px 0 7px; font-size: 10px; }
+      /* Chips cachés, dots visibles */
       .day-chips { display: none; }
       .day-dots  { display: flex; justify-content: center; width: 100%; }
-      .day-n     { text-align: center; }
-      .cal-day   { align-items: center; justify-content: center; min-height: 0; padding: 6px 3px; }
-      /* Calendrier plein écran */
-      .cal-section { padding: 12px 10px; display: flex; flex-direction: column; }
-      .cal-grid { flex: 1; grid-template-rows: auto repeat(6, 1fr); }
+      .cal-day {
+        align-items: center; justify-content: center;
+        min-height: 0; height: 100%;
+        aspect-ratio: unset; padding: 4px 2px;
+      }
+      .day-n { text-align: center; margin-bottom: 3px; font-size: 14px; }
     }
     @media (max-width: 520px) {
       .cal-section  { padding: 12px 8px; }
