@@ -58,7 +58,7 @@
       align-items: center; justify-content: center;
       min-height: 100vh; padding: 20px;
     }
-    #app { flex-direction: column; min-height: 100vh; }
+    #app { flex-direction: column; height: 100dvh; height: 100vh; overflow: hidden; }
 
     /* ── Auth Card ──────────────────────────────────────── */
     .card {
@@ -227,10 +227,10 @@
     }
 
     /* ── App Body ───────────────────────────────────────── */
-    .app-body { flex: 1; display: flex; overflow: hidden; }
+    .app-body { flex: 1; display: flex; overflow: hidden; min-height: 0; }
 
     /* Calendar */
-    .cal-section { flex: 1; padding: 28px 32px; overflow-y: auto; min-width: 0; }
+    .cal-section { flex: 1; padding: 28px 32px; overflow-y: auto; min-width: 0; min-height: 0; }
 
     .month-nav {
       display: flex; align-items: center;
@@ -492,7 +492,10 @@
       .day-chips { display: none; }
       .day-dots  { display: flex; justify-content: center; width: 100%; }
       .day-n     { text-align: center; }
-      .cal-day   { align-items: center; justify-content: center; min-height: 52px; padding: 6px 3px; }
+      .cal-day   { align-items: center; justify-content: center; min-height: 0; padding: 6px 3px; }
+      /* Calendrier plein écran */
+      .cal-section { padding: 12px 10px; display: flex; flex-direction: column; }
+      .cal-grid { flex: 1; grid-template-rows: auto repeat(6, 1fr); }
     }
     @media (max-width: 520px) {
       .cal-section  { padding: 12px 8px; }
