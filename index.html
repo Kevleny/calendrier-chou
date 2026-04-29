@@ -12,26 +12,27 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:          #07101c;
-      --surface:     #0f1e2e;
-      --surface-2:   #162840;
-      --surface-3:   #1e3554;
-      --border:      rgba(200,185,155,.1);
-      --border-hi:   rgba(200,185,155,.28);
-      --text:        #c8b99a;
-      --text-dim:    rgba(200,185,155,.42);
-      --text-bright: #e8dcc8;
-      --caen:        #f0b482;
-      --rochette:    #5ecece;
+      --bg:          #050c16;
+      --surface:     #0b1724;
+      --surface-2:   #112030;
+      --surface-3:   #18304a;
+      --border:      rgba(190,175,145,.1);
+      --border-hi:   rgba(190,175,145,.3);
+      --text:        #bfad92;
+      --text-dim:    rgba(190,175,145,.4);
+      --text-bright: #ede0c8;
+      --caen:        #ffaa5e;
+      --rochette:    #3dd9d9;
       --danger:      #e07878;
       --r:           12px;
-      --sidebar-w:   300px;
+      --sidebar-w:   310px;
     }
 
     body {
       background: var(--bg);
-      background-image: radial-gradient(ellipse at 30% 20%, rgba(240,180,130,.04) 0%, transparent 55%),
-                        radial-gradient(ellipse at 75% 80%, rgba(94,206,206,.04) 0%, transparent 55%);
+      background-image:
+        radial-gradient(ellipse 60% 50% at 15% 15%, rgba(255,170,94,.06) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 85% 85%, rgba(61,217,217,.06) 0%, transparent 70%);
       color: var(--text);
       font-family: 'Inter', system-ui, sans-serif;
       font-size: 14px;
@@ -44,9 +45,9 @@
       content: '';
       position: fixed; inset: 0;
       background-image:
-        linear-gradient(rgba(200,185,155,.055) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(200,185,155,.055) 1px, transparent 1px);
-      background-size: 56px 56px;
+        linear-gradient(rgba(190,175,145,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(190,175,145,.07) 1px, transparent 1px);
+      background-size: 52px 52px;
       pointer-events: none; z-index: 0;
     }
 
@@ -254,43 +255,53 @@
 
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
     .cal-hd {
-      text-align: center; font-size: 11px; font-weight: 600;
+      text-align: center; font-size: 11px; font-weight: 700;
       letter-spacing: .1em; text-transform: uppercase;
-      color: var(--text-dim); padding: 10px 0 12px;
+      color: var(--text-dim); padding: 10px 0 14px;
     }
     .cal-day {
-      aspect-ratio: 1;
       display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 6px 4px 5px;
-      border-radius: 10px; cursor: pointer; transition: all .18s;
+      align-items: flex-start;
+      padding: 8px 7px 6px;
+      border-radius: 11px; cursor: pointer; transition: all .18s;
       border: 1px solid var(--border);
-      background: rgba(15,30,46,.7);
-      min-height: 52px; position: relative;
+      background: rgba(11,23,36,.8);
+      min-height: 72px; position: relative; overflow: hidden;
     }
     .cal-day:hover {
       background: var(--surface-2);
-      border-color: rgba(200,185,155,.25);
+      border-color: rgba(190,175,145,.3);
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0,0,0,.35);
+      box-shadow: 0 8px 24px rgba(0,0,0,.4);
     }
     .cal-day:active { transform: translateY(0); }
-    .cal-day.other-month { opacity: .25; pointer-events: none; }
+    .cal-day.other-month { opacity: .2; pointer-events: none; }
     .cal-day.today {
-      background: linear-gradient(135deg, rgba(240,180,130,.18), rgba(240,180,130,.06));
-      border-color: rgba(240,180,130,.55);
-      box-shadow: 0 0 20px rgba(240,180,130,.18), inset 0 1px 0 rgba(240,180,130,.2);
+      background: linear-gradient(145deg, rgba(255,170,94,.2), rgba(255,170,94,.07));
+      border-color: rgba(255,170,94,.6);
+      box-shadow: 0 0 24px rgba(255,170,94,.2), inset 0 1px 0 rgba(255,170,94,.25);
     }
-    .cal-day.today .day-n { color: var(--caen); font-weight: 700; }
-    .cal-day.has-events {
-      background: rgba(22,40,64,.8);
-      border-color: rgba(200,185,155,.18);
+    .cal-day.today .day-n { color: var(--caen); font-weight: 800; }
+    .cal-day.has-events { border-color: rgba(190,175,145,.2); }
+    .cal-day.today.has-events {
+      background: linear-gradient(145deg, rgba(255,170,94,.22), rgba(255,170,94,.08));
     }
-    .cal-day.today.has-events { background: linear-gradient(135deg, rgba(240,180,130,.2), rgba(240,180,130,.08)); }
 
-    .day-n { font-size: 14px; color: var(--text); line-height: 1; margin-bottom: 5px; font-weight: 500; }
-    .day-dots { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; max-width: 36px; }
-    .day-dot  { width: 7px; height: 7px; border-radius: 50%; }
+    .day-n {
+      font-size: 15px; color: var(--text-bright); line-height: 1;
+      margin-bottom: 6px; font-weight: 600; align-self: flex-end;
+      width: 100%; text-align: right;
+    }
+    .day-chips { display: flex; flex-direction: column; gap: 3px; width: 100%; }
+    .day-chip {
+      font-size: 9px; font-weight: 700; letter-spacing: .02em;
+      padding: 2px 5px; border-radius: 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      border-left: 2px solid;
+    }
+    /* Mobile: dots only */
+    .day-dots { display: none; gap: 4px; flex-wrap: wrap; }
+    .day-dot  { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
     /* ── Sidebar ────────────────────────────────────────── */
     .sidebar {
@@ -476,23 +487,30 @@
       .cal-section { padding: 20px 14px; }
       .month-title { font-size: 26px; }
     }
+    @media (max-width: 600px) {
+      /* Sur mobile : chips cachés, dots visibles */
+      .day-chips { display: none; }
+      .day-dots  { display: flex; justify-content: center; width: 100%; }
+      .day-n     { text-align: center; }
+      .cal-day   { align-items: center; justify-content: center; min-height: 52px; padding: 6px 3px; }
+    }
     @media (max-width: 520px) {
-      .cal-section { padding: 14px 10px; }
-      .cal-grid    { gap: 3px; }
-      .cal-day     { border-radius: 8px; min-height: 46px; }
-      .day-n       { font-size: 13px; }
-      .day-dot     { width: 6px; height: 6px; }
-      .app-header  { padding: 0 12px; height: 54px; }
+      .cal-section  { padding: 12px 8px; }
+      .cal-grid     { gap: 3px; }
+      .cal-day      { border-radius: 9px; min-height: 48px; }
+      .day-n        { font-size: 14px; margin-bottom: 4px; }
+      .day-dot      { width: 6px; height: 6px; }
+      .app-header   { padding: 0 12px; height: 54px; }
       .header-title { display: none; }
-      .hcity       { font-size: 10px; }
-      .btn-logout  { display: none; }
-      .month-title { font-size: 22px; }
-      .nav-btn     { width: 36px; height: 36px; }
+      .hcity        { font-size: 10px; }
+      .btn-logout   { display: none; }
+      .month-title  { font-size: 22px; }
+      .nav-btn      { width: 36px; height: 36px; font-size: 16px; }
     }
     @media (max-width: 360px) {
-      .cal-section { padding: 12px 6px; }
+      .cal-section { padding: 10px 6px; }
       .cal-grid    { gap: 2px; }
-      .day-n       { font-size: 12px; }
+      .day-n       { font-size: 13px; }
     }
   </style>
 </head>
@@ -944,12 +962,19 @@ function renderCalendar() {
       (isToday ? ' today' : '') +
       (evs.length ? ' has-events' : '');
 
-    const dots = evs.slice(0, 3).map(ev => {
-      const color = S.profiles[ev.created_by]?.color || '#f0b482';
-      return `<div class="day-dot" style="background:${color};box-shadow:0 0 6px ${color}"></div>`;
+    // Chips (desktop) + dots (mobile)
+    const chips = evs.slice(0, 3).map(ev => {
+      const color = S.profiles[ev.created_by]?.color || '#ffaa5e';
+      const title = ev.title.length > 10 ? ev.title.slice(0, 9) + '…' : ev.title;
+      return `<div class="day-chip" style="background:${color}22;border-left-color:${color};color:${color}">${esc(title)}</div>`;
     }).join('');
 
-    cell.innerHTML = `<span class="day-n">${date.getDate()}</span><div class="day-dots">${dots}</div>`;
+    const dots = evs.slice(0, 3).map(ev => {
+      const color = S.profiles[ev.created_by]?.color || '#ffaa5e';
+      return `<div class="day-dot" style="background:${color};box-shadow:0 0 6px ${color}90"></div>`;
+    }).join('');
+
+    cell.innerHTML = `<span class="day-n">${date.getDate()}</span><div class="day-chips">${chips}</div><div class="day-dots">${dots}</div>`;
     cell.addEventListener('click', () => openModal(date));
     grid.appendChild(cell);
   });
