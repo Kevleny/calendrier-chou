@@ -675,6 +675,20 @@
 <!-- ── Toast ─────────────────────────────────────────────── -->
 <div class="toast" id="toast"></div>
 
+<!-- ── Popup aujourd'hui ─────────────────────────────────── -->
+<div class="modal-ov" id="todayOv" onclick="handleTodayClick(event)">
+  <div class="modal" id="todayModal">
+    <div class="modal-head" style="background:linear-gradient(135deg,rgba(255,170,94,.15),rgba(61,217,217,.1));border-bottom:1px solid var(--border)">
+      <div>
+        <div class="modal-date" id="todayTitle"></div>
+        <div style="font-size:12px;color:var(--text-dim);margin-top:3px">📅 Aujourd'hui sur votre planning</div>
+      </div>
+      <button class="modal-close" onclick="closeTodayPopup()">×</button>
+    </div>
+    <div class="modal-body" id="todayBody"></div>
+  </div>
+</div>
+
 <script>
 // ═══════════════════════════════════════════════════════════
 // CONFIG
@@ -820,6 +834,7 @@ async function launchApp() {
   renderCalendar();
   renderStats();
   requestNotifPerm();
+  checkTodayEvents();
 }
 
 function updateUserBadge() {
@@ -1227,6 +1242,53 @@ function renderStats() {
 // ═══════════════════════════════════════════════════════════
 // DRAWER
 // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
+// POPUP AUJOURD'HUI
+// ═══════════════════════════════════════════════════════════
+function checkTodayEvents() {
+  const today = new Date();
+  const todayStr = ds(today);
+  const evs = S.events.filter(e => e.event_date === todayStr);
+  if (!evs.length) return;
+
+  // Une seule fois par jour par session
+  const key = `today_shown_${todayStr}`;
+  if (sessionStorage.getItem(key)) return;
+  sessionStorage.setItem(key, '1');
+
+  // Titre
+  document.getElementById('todayTitle').textContent =
+    today.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  // Contenu
+  let h = '';
+  evs.forEach(ev => {
+    const profile = S.profiles[ev.created_by];
+    const color   = profile?.color || '#ffaa5e';
+    let meta = [];
+    if (ev.event_time) meta.push(`🕐 ${ev.event_time.slice(0,5)}`);
+    if (ev.location)   meta.push(`📍 ${esc(ev.location)}`);
+    if (profile)       meta.push(`— ${esc(profile.name)}`);
+    h += `<div class="ev-item">
+      <div class="ev-bar" style="background:${color}"></div>
+      <div class="ev-info">
+        <div class="ev-title">${esc(ev.title)}</div>
+        ${meta.length ? `<div class="ev-meta">${meta.join(' ')}</div>` : ''}
+      </div>
+    </div>`;
+  });
+  document.getElementById('todayBody').innerHTML = h;
+  document.getElementById('todayOv').classList.add('open');
+}
+
+function closeTodayPopup() {
+  document.getElementById('todayOv').classList.remove('open');
+}
+
+function handleTodayClick(e) {
+  if (e.target === document.getElementById('todayOv')) closeTodayPopup();
+}
+
 function openDrawer()  {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawerOv').classList.add('open');
