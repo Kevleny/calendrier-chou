@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="color-scheme" content="dark">
+  <title>Notre Calendrier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* ── Reset ─────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0e1e2b;
+      --surface:     #132030;
+      --surface-2:   #1b2e42;
+      --border:      rgba(212,197,169,.12);
+      --border-hi:   rgba(212,197,169,.28);
+      --text:        #d4c5a9;
+      --text-dim:    rgba(212,197,169,.45);
+      --text-bright: #e8dcc8;
+      --caen:        #e8a87c;
+      --rochette:    #7ec8c8;
+      --danger:      #e07878;
+      --r:           10px;
+      --sidebar-w:   290px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Grille cartographique */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(212,197,169,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(212,197,169,.035) 1px, transparent 1px);
+      background-size: 64px 64px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Screens ────────────────────────────────────────── */
+    .screen { display: none; position: relative; z-index: 1; }
+    .screen.active { display: flex; }
+    #auth-screen, #profile-screen {
+      align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px;
+    }
+    #app { flex-direction: column; min-height: 100vh; }
+
+    /* ── Auth Card ──────────────────────────────────────── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 36px;
+      width: 100%; max-width: 400px;
+    }
+
+    .card-logo {
+      text-align: center; margin-bottom: 28px;
+    }
+    .card-logo h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px; color: var(--text-bright);
+      letter-spacing: .06em;
+    }
+    .card-logo p {
+      font-size: 11px; color: var(--text-dim);
+      letter-spacing: .12em; text-transform: uppercase; margin-top: 4px;
+    }
+
+    .cities-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; background: rgba(0,0,0,.2);
+      border-radius: 6px; margin-bottom: 28px;
+    }
+    .city-tag { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+    .city-tag.caen     { color: var(--caen); }
+    .city-tag.rochette { color: var(--rochette); }
+    .route-sep { flex: 1; border-top: 1px dashed rgba(212,197,169,.2); }
+
+    /* Tabs */
+    .tabs { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 22px; }
+    .tab {
+      flex: 1; padding: 10px; text-align: center;
+      font-size: 13px; cursor: pointer; background: none; border: none;
+      border-bottom: 2px solid transparent; color: var(--text-dim);
+      font-family: inherit; transition: all .2s;
+    }
+    .tab.active { color: var(--text); border-bottom-color: var(--caen); }
+
+    /* Form */
+    .form-group { margin-bottom: 14px; }
+    label {
+      display: block; font-size: 11px; font-weight: 500;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 6px;
+    }
+    input[type=text], input[type=email], input[type=password],
+    input[type=time], select {
+      width: 100%; padding: 10px 13px;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text);
+      font-size: 14px; font-family: inherit; outline: none;
+      transition: border-color .2s;
+    }
+    input:focus, select:focus { border-color: var(--border-hi); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      gap: 7px; padding: 10px 16px; border-radius: 6px;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      border: none; transition: all .2s; font-family: inherit;
+    }
+    .btn-primary { background: var(--caen); color: #0e1e2b; width: 100%; padding: 12px; margin-top: 6px; }
+    .btn-primary:hover { opacity: .88; }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-ghost  { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .btn-ghost:hover { border-color: var(--border-hi); }
+    .btn-sm { padding: 7px 12px; font-size: 12px; }
+    .btn-danger-sm {
+      background: none; border: 1px solid rgba(224,120,120,.3);
+      color: var(--danger); font-size: 12px; padding: 5px 10px;
+      border-radius: 5px; cursor: pointer; font-family: inherit;
+      transition: all .2s;
+    }
+    .btn-danger-sm:hover { background: rgba(224,120,120,.1); }
+
+    .msg-error { color: var(--danger); font-size: 12px; margin-top: 10px; text-align: center; }
+    .msg-info  { color: var(--rochette); font-size: 12px; margin-top: 10px; text-align: center; }
+
+    /* ── Profile Setup ──────────────────────────────────── */
+    .city-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+    .city-opt {
+      padding: 16px 10px; border: 2px solid var(--border);
+      border-radius: 8px; cursor: pointer; text-align: center;
+      background: none; color: var(--text); font-family: inherit;
+      transition: all .2s;
+    }
+    .city-opt:hover { border-color: var(--border-hi); }
+    .city-opt.sel-caen     { border-color: var(--caen);     background: rgba(232,168,124,.08); }
+    .city-opt.sel-rochette { border-color: var(--rochette); background: rgba(126,200,200,.08); }
+    .city-opt .dot { width: 10px; height: 10px; border-radius: 50%; margin: 0 auto 8px; }
+    .city-opt .name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .city-opt .region { font-size: 11px; opacity: .7; }
+
+    /* ── App Header ─────────────────────────────────────── */
+    .app-header {
+      padding: 14px 24px; border-bottom: 1px solid var(--border);
+      background: rgba(14,30,43,.85); backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .header-route {
+      display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;
+    }
+    .hcity {
+      font-size: 10px; font-weight: 600; letter-spacing: .16em;
+      text-transform: uppercase; white-space: nowrap;
+    }
+    .hcity.caen     { color: var(--caen); }
+    .hcity.rochette { color: var(--rochette); }
+    .hline { flex: 1; border-top: 1px dashed rgba(212,197,169,.18); }
+    .hmarker { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .hmarker.caen     { background: var(--caen); }
+    .hmarker.rochette { background: var(--rochette); }
+
+    .header-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px; color: var(--text-bright); white-space: nowrap;
+      letter-spacing: .04em;
+    }
+    .header-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+    .user-badge {
+      font-size: 11px; color: var(--text-dim);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .user-dot { width: 7px; height: 7px; border-radius: 50%; }
+    .btn-logout {
+      font-size: 11px; color: var(--text-dim); background: none;
+      border: none; cursor: pointer; font-family: inherit;
+      padding: 4px 8px; border-radius: 4px; transition: color .2s;
+    }
+    .btn-logout:hover { color: var(--text); }
+
+    /* Hamburger */
+    .hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer;
+      padding: 6px; border-radius: 6px; flex-shrink: 0;
+    }
+    .hamburger span {
+      display: block; width: 22px; height: 2px;
+      background: var(--text); border-radius: 1px;
+    }
+
+    /* ── App Body ───────────────────────────────────────── */
+    .app-body { flex: 1; display: flex; overflow: hidden; }
+
+    /* Calendar */
+    .cal-section { flex: 1; padding: 28px 32px; overflow-y: auto; min-width: 0; }
+
+    .month-nav {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 26px;
+    }
+    .month-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px; font-weight: 600;
+      color: var(--text-bright); text-transform: capitalize;
+    }
+    .nav-btn {
+      width: 36px; height: 36px; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--surface); border: 1px solid var(--border);
+      cursor: pointer; color: var(--text); font-size: 15px;
+      transition: border-color .2s;
+    }
+    .nav-btn:hover { border-color: var(--border-hi); }
+
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .cal-hd {
+      text-align: center; font-size: 11px; font-weight: 500;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--text-dim); padding: 8px 0;
+    }
+    .cal-day {
+      aspect-ratio: 1; display: flex; flex-direction: column;
+      align-items: center; padding: 8px 4px 5px;
+      border-radius: 8px; cursor: pointer; transition: all .15s;
+      border: 1px solid transparent; min-height: 52px;
+    }
+    .cal-day:hover            { background: var(--surface); }
+    .cal-day.other-month      { opacity: .3; }
+    .cal-day.today            { border-color: rgba(212,197,169,.3); background: rgba(212,197,169,.05); }
+    .cal-day.today .day-n     { color: var(--text-bright); font-weight: 600; }
+    .cal-day.has-events       { background: var(--surface); }
+    .day-n { font-size: 13px; color: var(--text); line-height: 1; margin-bottom: 5px; }
+    .day-dots { display: flex; gap: 3px; flex-wrap: wrap; justify-content: center; max-width: 34px; }
+    .day-dot  { width: 5px; height: 5px; border-radius: 50%; }
+
+    /* ── Sidebar ────────────────────────────────────────── */
+    .sidebar {
+      width: var(--sidebar-w); flex-shrink: 0;
+      border-left: 1px solid var(--border);
+      padding: 28px 20px; overflow-y: auto;
+      background: rgba(14,26,39,.45);
+    }
+    .sb-section { margin-bottom: 28px; }
+    .sb-title {
+      font-size: 10px; font-weight: 600; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--text-dim);
+      padding-bottom: 8px; margin-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .next-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px; transition: border-color .3s;
+    }
+    .next-date  { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--text-bright); margin-bottom: 4px; }
+    .next-title { font-size: 14px; color: var(--text); margin-bottom: 3px; }
+    .next-loc   { font-size: 12px; color: var(--text-dim); }
+    .countdown  { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--caen); margin-top: 10px; line-height: 1; }
+    .countdown-lbl { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+    .user-stat { margin-bottom: 10px; }
+    .us-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+    .us-name   { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+    .us-dot    { width: 8px; height: 8px; border-radius: 50%; }
+    .us-count  { font-size: 12px; color: var(--text-dim); }
+    .bar-bg    { height: 4px; background: var(--surface); border-radius: 2px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 2px; transition: width .5s ease; }
+
+    .recent-ev { padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .recent-ev:last-child { border-bottom: none; }
+    .recent-title { font-size: 13px; color: var(--text); margin-bottom: 2px; padding-left: 8px; border-left-width: 3px; border-left-style: solid; }
+    .recent-meta  { font-size: 11px; color: var(--text-dim); }
+
+    .empty-msg { font-size: 13px; color: var(--text-dim); font-style: italic; }
+
+    /* ── Drawer (mobile) ────────────────────────────────── */
+    .drawer-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.55); z-index: 200;
+      backdrop-filter: blur(4px);
+    }
+    .drawer-overlay.open { display: block; }
+    .drawer {
+      position: fixed; top: 0; right: -300px; width: 280px;
+      height: 100vh; background: var(--surface);
+      border-left: 1px solid var(--border); z-index: 201;
+      padding: 20px; overflow-y: auto;
+      transition: right .3s ease;
+    }
+    .drawer.open { right: 0; }
+    .drawer-head {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 22px;
+    }
+    .drawer-close {
+      background: none; border: none; color: var(--text-dim);
+      cursor: pointer; font-size: 22px; padding: 4px; line-height: 1;
+    }
+
+    /* ── Modal ──────────────────────────────────────────── */
+    .modal-ov {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.6); z-index: 300;
+      backdrop-filter: blur(5px);
+      align-items: flex-end; justify-content: center; padding: 16px;
+    }
+    .modal-ov.open { display: flex; }
+    @media (min-width: 600px) { .modal-ov { align-items: center; } }
+
+    .modal {
+      background: var(--surface); border: 1px solid var(--border-hi);
+      border-radius: 14px; width: 100%; max-width: 430px;
+      max-height: 88vh; overflow-y: auto;
+      animation: slideUp .22s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(18px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .modal-head {
+      padding: 20px 20px 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .modal-date {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px; color: var(--text-bright); text-transform: capitalize;
+    }
+    .modal-close {
+      background: none; border: none; color: var(--text-dim);
+      cursor: pointer; font-size: 22px; padding: 4px; line-height: 1;
+      border-radius: 50%; transition: color .2s;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 14px 20px 22px; }
+
+    .ev-item {
+      display: flex; align-items: flex-start; gap: 11px;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .ev-item:last-child { border-bottom: none; }
+    .ev-bar  { width: 3px; border-radius: 2px; align-self: stretch; min-height: 36px; margin-top: 2px; flex-shrink: 0; }
+    .ev-info { flex: 1; min-width: 0; }
+    .ev-title { font-size: 14px; font-weight: 500; color: var(--text-bright); margin-bottom: 3px; }
+    .ev-meta  { font-size: 12px; color: var(--text-dim); }
+    .ev-acts  { display: flex; gap: 4px; flex-shrink: 0; }
+    .icon-btn {
+      background: none; border: none; cursor: pointer; padding: 4px;
+      border-radius: 4px; font-size: 14px; color: var(--text-dim);
+      transition: all .2s;
+    }
+    .icon-btn:hover       { color: var(--text); background: rgba(255,255,255,.05); }
+    .icon-btn.del:hover   { color: var(--danger); }
+
+    .no-ev { color: var(--text-dim); font-size: 13px; padding: 8px 0 14px; font-style: italic; }
+
+    /* Event form (inline modal) */
+    .ev-form {
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px; margin-top: 6px;
+    }
+    .ev-form .form-group { margin-bottom: 12px; }
+    .ev-form .form-group:last-child { margin-bottom: 0; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-acts { display: flex; gap: 8px; margin-top: 12px; }
+
+    .btn-add {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 10px 14px; background: none;
+      border: 1px dashed var(--border); border-radius: 8px;
+      color: var(--text-dim); cursor: pointer; font-size: 13px;
+      font-family: inherit; transition: all .2s;
+    }
+    .btn-add:hover { border-color: var(--caen); color: var(--caen); }
+
+    /* ── Toast ──────────────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 11px 20px; font-size: 13px;
+      color: var(--text); z-index: 500; transition: transform .3s ease;
+      max-width: 340px; text-align: center; pointer-events: none;
+    }
+    .toast.show            { transform: translateX(-50%) translateY(0); }
+    .toast.ok  { border-color: var(--rochette); }
+    .toast.err { border-color: var(--danger); }
+
+    /* ── Responsive ─────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .sidebar    { display: none; }
+      .hamburger  { display: flex; }
+      .cal-section { padding: 20px 16px; }
+    }
+    @media (max-width: 480px) {
+      .cal-section { padding: 14px 10px; }
+      .cal-day { padding: 6px 2px 4px; min-height: 40px; }
+      .day-n   { font-size: 12px; }
+      .app-header { padding: 11px 14px; }
+      .header-title { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Auth ──────────────────────────────────────────────── -->
+<div id="auth-screen" class="screen active">
+  <div class="card">
+    <div class="card-logo">
+      <h1>Notre Calendrier</h1>
+      <p>Caen · La Rochette</p>
+    </div>
+    <div class="cities-row">
+      <span class="city-tag caen">Caen</span>
+      <div class="route-sep"></div>
+      <span class="city-tag rochette">La Rochette</span>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-mode="login"    onclick="switchTab('login')">Connexion</button>
+      <button class="tab"        data-mode="register" onclick="switchTab('register')">Inscription</button>
+    </div>
+    <form id="authForm" onsubmit="handleAuth(event)">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="authEmail" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="authPwd" autocomplete="current-password" minlength="6" required>
+      </div>
+      <button class="btn btn-primary" id="authBtn" type="submit">Se connecter</button>
+      <div id="authMsg"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Profile Setup ─────────────────────────────────────── -->
+<div id="profile-screen" class="screen">
+  <div class="card">
+    <div class="card-logo">
+      <h1>Bienvenue !</h1>
+      <p>Complétez votre profil</p>
+    </div>
+    <form id="profileForm" onsubmit="handleProfile(event)">
+      <div class="form-group">
+        <label>Votre prénom</label>
+        <input type="text" id="profileName" required>
+      </div>
+      <div class="form-group">
+        <label>Votre ville</label>
+        <div class="city-grid">
+          <button type="button" class="city-opt" data-city="Caen" onclick="pickCity('Caen')">
+            <div class="dot" style="background:var(--caen)"></div>
+            <div class="name">Caen</div>
+            <div class="region" style="color:var(--caen)">Normandie</div>
+          </button>
+          <button type="button" class="city-opt" data-city="La Rochette" onclick="pickCity('La Rochette')">
+            <div class="dot" style="background:var(--rochette)"></div>
+            <div class="name">La Rochette</div>
+            <div class="region" style="color:var(--rochette)">Savoie</div>
+          </button>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="profileBtn" type="submit">Continuer</button>
+      <div id="profileMsg" class="msg-error"></div>
+    </form>
+  </div>
+</div>
+
+<!-- ── App ───────────────────────────────────────────────── -->
+<div id="app" class="screen">
+
+  <!-- Header -->
+  <header class="app-header">
+    <button class="hamburger" onclick="openDrawer()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="header-route">
+      <span class="hcity caen">Caen</span>
+      <div class="hmarker caen"></div>
+      <div class="hline"></div>
+      <div class="hmarker rochette"></div>
+      <span class="hcity rochette">La Rochette</span>
+    </div>
+    <span class="header-title">Notre Calendrier</span>
+    <div class="header-right">
+      <div class="user-badge">
+        <div class="user-dot" id="userDot"></div>
+        <span id="userName"></span>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Déconnexion</button>
+    </div>
+  </header>
+
+  <!-- Body -->
+  <div class="app-body">
+
+    <!-- Calendar -->
+    <main class="cal-section">
+      <div class="month-nav">
+        <button class="nav-btn" onclick="changeMonth(-1)">&#8249;</button>
+        <div class="month-title" id="monthTitle"></div>
+        <button class="nav-btn" onclick="changeMonth(1)">&#8250;</button>
+      </div>
+      <div class="cal-grid" id="calGrid">
+        <div class="cal-hd">Lun</div>
+        <div class="cal-hd">Mar</div>
+        <div class="cal-hd">Mer</div>
+        <div class="cal-hd">Jeu</div>
+        <div class="cal-hd">Ven</div>
+        <div class="cal-hd">Sam</div>
+        <div class="cal-hd">Dim</div>
+      </div>
+    </main>
+
+    <!-- Sidebar (PC) -->
+    <aside class="sidebar" id="sidebar">
+      <div id="sidebarContent"></div>
+    </aside>
+  </div>
+
+</div><!-- #app -->
+
+<!-- ── Drawer (mobile) ──────────────────────────────────── -->
+<div class="drawer-overlay" id="drawerOv" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-head">
+    <span style="font-size:13px;font-weight:600;color:var(--text)">Statistiques</span>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div id="drawerContent"></div>
+</div>
+
+<!-- ── Event Modal ───────────────────────────────────────── -->
+<div class="modal-ov" id="modalOv" onclick="handleModalClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div class="modal-date" id="modalDate"></div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<!-- ── Toast ─────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════
+const SUPA_URL = 'https://ttuisauvkjqldkmejgtg.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0dWlzYXV2a2pxbGRrbWVqZ3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNjQwOTYsImV4cCI6MjA4OTk0MDA5Nn0.aKikyVTGl6HVSVrKngGA-LR5VMMiTg37DFwJ0V7GW0A';
+const CITY_COLORS = { 'Caen': '#e8a87c', 'La Rochette': '#7ec8c8' };
+const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+const S = {
+  session: null, profile: null, profiles: {},
+  events: [], year: new Date().getFullYear(),
+  month: new Date().getMonth(),
+  selectedDate: null, editingId: null, showForm: false,
+  channel: null, selectedCity: ''
+};
+
+// ═══════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════
+let authMode = 'login';
+
+function switchTab(mode) {
+  authMode = mode;
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.mode === mode)
+  );
+  document.getElementById('authBtn').textContent =
+    mode === 'login' ? 'Se connecter' : 'Créer un compte';
+  document.getElementById('authMsg').textContent = '';
+}
+
+async function handleAuth(e) {
+  e.preventDefault();
+  const email = document.getElementById('authEmail').value.trim();
+  const pwd   = document.getElementById('authPwd').value;
+  const btn   = document.getElementById('authBtn');
+  const msg   = document.getElementById('authMsg');
+
+  btn.disabled = true;
+  btn.textContent = '…';
+  msg.textContent = '';
+  msg.className = 'msg-error';
+
+  try {
+    if (authMode === 'login') {
+      const { data, error } = await sb.auth.signInWithPassword({ email, password: pwd });
+      if (error) throw error;
+      S.session = data.session;
+      await afterLogin();
+    } else {
+      const { data, error } = await sb.auth.signUp({ email, password: pwd });
+      if (error) throw error;
+      if (!data.session) {
+        msg.className = 'msg-info';
+        msg.textContent = '✓ Email de confirmation envoyé. Vérifiez votre boîte, puis connectez-vous.';
+        btn.disabled = false;
+        btn.textContent = 'Créer un compte';
+        return;
+      }
+      S.session = data.session;
+      await afterLogin();
+    }
+  } catch (err) {
+    msg.textContent = err.message;
+    btn.disabled = false;
+    btn.textContent = authMode === 'login' ? 'Se connecter' : 'Créer un compte';
+  }
+}
+
+async function afterLogin() {
+  const { data: profiles } = await sb.from('profiles').select('*');
+  S.profiles = {};
+  (profiles || []).forEach(p => { S.profiles[p.id] = p; });
+  const uid = S.session.user.id;
+  S.profile = S.profiles[uid] || null;
+  if (!S.profile) { showScreen('profile'); }
+  else { await launchApp(); }
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  if (S.channel) sb.removeChannel(S.channel);
+  Object.assign(S, { session: null, profile: null, profiles: {}, events: [], channel: null });
+  showScreen('auth');
+}
+
+// ═══════════════════════════════════════════════════════════
+// PROFILE SETUP
+// ═══════════════════════════════════════════════════════════
+function pickCity(city) {
+  S.selectedCity = city;
+  document.querySelectorAll('.city-opt').forEach(el => {
+    el.className = 'city-opt';
+    if (el.dataset.city === city) {
+      el.classList.add(city === 'Caen' ? 'sel-caen' : 'sel-rochette');
+    }
+  });
+}
+
+async function handleProfile(e) {
+  e.preventDefault();
+  const name = document.getElementById('profileName').value.trim();
+  const msg  = document.getElementById('profileMsg');
+  if (!name)           { msg.textContent = 'Entrez votre prénom.'; return; }
+  if (!S.selectedCity) { msg.textContent = 'Choisissez votre ville.'; return; }
+
+  const btn = document.getElementById('profileBtn');
+  btn.disabled = true;
+  const color = CITY_COLORS[S.selectedCity] || '#e8a87c';
+  const uid   = S.session.user.id;
+
+  const { data, error } = await sb.from('profiles')
+    .insert({ id: uid, name, city: S.selectedCity, color })
+    .select().single();
+
+  if (error) {
+    msg.textContent = error.message;
+    btn.disabled = false;
+    return;
+  }
+  S.profile = data;
+  S.profiles[uid] = data;
+  await launchApp();
+}
+
+// ═══════════════════════════════════════════════════════════
+// APP LAUNCH
+// ═══════════════════════════════════════════════════════════
+async function launchApp() {
+  showScreen('app');
+  updateUserBadge();
+  await fetchProfiles();
+  await fetchEvents();
+  subscribeRealtime();
+  renderCalendar();
+  renderStats();
+  requestNotifPerm();
+}
+
+function updateUserBadge() {
+  if (!S.profile) return;
+  document.getElementById('userName').textContent = S.profile.name;
+  document.getElementById('userDot').style.background = S.profile.color;
+}
+
+async function fetchProfiles() {
+  const { data } = await sb.from('profiles').select('*');
+  S.profiles = {};
+  (data || []).forEach(p => { S.profiles[p.id] = p; });
+}
+
+// ═══════════════════════════════════════════════════════════
+// EVENTS CRUD
+// ═══════════════════════════════════════════════════════════
+async function fetchEvents() {
+  const { data } = await sb.from('events').select('*').order('event_date');
+  S.events = data || [];
+}
+
+async function createEvent(fields) {
+  const { data, error } = await sb.from('events')
+    .insert({ ...fields, created_by: S.session.user.id })
+    .select().single();
+  if (error) throw error;
+  if (!S.events.find(e => e.id === data.id)) {
+    S.events.push(data);
+    S.events.sort((a, b) => a.event_date.localeCompare(b.event_date));
+  }
+  return data;
+}
+
+async function updateEvent(id, fields) {
+  const { data, error } = await sb.from('events').update(fields).eq('id', id).select().single();
+  if (error) throw error;
+  const i = S.events.findIndex(e => e.id === id);
+  if (i >= 0) S.events[i] = data; else S.events.push(data);
+  return data;
+}
+
+async function deleteEvent(id) {
+  const { error } = await sb.from('events').delete().eq('id', id);
+  if (error) throw error;
+  S.events = S.events.filter(e => e.id !== id);
+}
+
+// ═══════════════════════════════════════════════════════════
+// REALTIME
+// ═══════════════════════════════════════════════════════════
+function subscribeRealtime() {
+  if (S.channel) sb.removeChannel(S.channel);
+  const uid = () => S.session?.user?.id;
+
+  S.channel = sb.channel('events-rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, async payload => {
+      const me = uid();
+
+      if (payload.eventType === 'INSERT') {
+        if (S.events.find(e => e.id === payload.new.id)) return;
+        S.events.push(payload.new);
+        S.events.sort((a, b) => a.event_date.localeCompare(b.event_date));
+        if (payload.new.created_by !== me) {
+          if (!S.profiles[payload.new.created_by]) await fetchProfiles();
+          const who = S.profiles[payload.new.created_by]?.name || 'Quelqu\'un';
+          notify(`${who} a ajouté "${payload.new.title}"`);
+        }
+      } else if (payload.eventType === 'UPDATE') {
+        const i = S.events.findIndex(e => e.id === payload.new.id);
+        if (i >= 0) { if (S.events[i].updated_at === payload.new.updated_at) return; S.events[i] = payload.new; }
+        else S.events.push(payload.new);
+        if (payload.new.created_by !== me) {
+          const who = S.profiles[payload.new.created_by]?.name || 'Quelqu\'un';
+          notify(`${who} a modifié "${payload.new.title}"`);
+        }
+      } else if (payload.eventType === 'DELETE') {
+        const existing = S.events.find(e => e.id === payload.old.id);
+        if (!existing) return;
+        const wasOther = existing.created_by !== me;
+        S.events = S.events.filter(e => e.id !== payload.old.id);
+        if (wasOther) notify('Un événement a été supprimé du planning');
+      }
+
+      renderCalendar();
+      renderStats();
+      if (S.selectedDate && document.getElementById('modalOv').classList.contains('open')) {
+        renderModalBody();
+      }
+    })
+    .subscribe();
+}
+
+// ═══════════════════════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════
+async function requestNotifPerm() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    await Notification.requestPermission();
+  }
+}
+
+function notify(message) {
+  toast(message, 'ok');
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('Notre Calendrier ♡', { body: message });
+  }
+}
+
+let _toastT;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast show${type ? ' ' + type : ''}`;
+  clearTimeout(_toastT);
+  _toastT = setTimeout(() => { el.className = 'toast'; }, 3500);
+}
+
+// ═══════════════════════════════════════════════════════════
+// CALENDAR
+// ═══════════════════════════════════════════════════════════
+function ds(date) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+function evForDate(date) { return S.events.filter(e => e.event_date === ds(date)); }
+
+function calDays(y, m) {
+  const first = new Date(y, m, 1);
+  const last  = new Date(y, m + 1, 0);
+  let dow = first.getDay();
+  dow = dow === 0 ? 6 : dow - 1; // Mon = 0
+
+  const days = [];
+  for (let i = dow - 1; i >= 0; i--) days.push({ date: new Date(y, m, -i), cur: false });
+  for (let d = 1; d <= last.getDate(); d++) days.push({ date: new Date(y, m, d), cur: true });
+  const rem = 7 - (days.length % 7);
+  if (rem < 7) for (let d = 1; d <= rem; d++) days.push({ date: new Date(y, m+1, d), cur: false });
+  return days;
+}
+
+function renderCalendar() {
+  const today = ds(new Date());
+  document.getElementById('monthTitle').textContent = `${MONTHS[S.month]} ${S.year}`;
+
+  const grid = document.getElementById('calGrid');
+  // Remove all day cells (keep headers = first 7 children)
+  while (grid.children.length > 7) grid.removeChild(grid.lastChild);
+
+  calDays(S.year, S.month).forEach(({ date, cur }) => {
+    const d = ds(date), evs = evForDate(date);
+    const isToday = d === today;
+
+    const cell = document.createElement('div');
+    cell.className = 'cal-day' +
+      (!cur ? ' other-month' : '') +
+      (isToday ? ' today' : '') +
+      (evs.length ? ' has-events' : '');
+
+    const dots = evs.slice(0, 3).map(ev => {
+      const color = S.profiles[ev.created_by]?.color || '#e8a87c';
+      return `<div class="day-dot" style="background:${color}"></div>`;
+    }).join('');
+
+    cell.innerHTML = `<span class="day-n">${date.getDate()}</span><div class="day-dots">${dots}</div>`;
+    cell.addEventListener('click', () => openModal(date));
+    grid.appendChild(cell);
+  });
+}
+
+function changeMonth(dir) {
+  S.month += dir;
+  if (S.month > 11) { S.month = 0; S.year++; }
+  if (S.month < 0)  { S.month = 11; S.year--; }
+  renderCalendar();
+  renderStats();
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════════
+function openModal(date) {
+  S.selectedDate = date; S.editingId = null; S.showForm = false;
+  document.getElementById('modalDate').textContent =
+    date.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+  renderModalBody();
+  document.getElementById('modalOv').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOv').classList.remove('open');
+  S.selectedDate = null; S.editingId = null; S.showForm = false;
+}
+
+function handleModalClick(e) {
+  if (e.target === document.getElementById('modalOv')) closeModal();
+}
+
+function renderModalBody() {
+  if (!S.selectedDate) return;
+  const evs = evForDate(S.selectedDate);
+  const uid = S.session.user.id;
+  const dateStr = ds(S.selectedDate);
+  let h = '';
+
+  if (evs.length) {
+    evs.forEach(ev => {
+      const color = S.profiles[ev.created_by]?.color || '#e8a87c';
+      const own   = ev.created_by === uid;
+      let meta = [];
+      if (ev.event_time) meta.push(`🕐 ${ev.event_time.slice(0,5)}`);
+      if (ev.location)   meta.push(`📍 ${esc(ev.location)}`);
+      const author = S.profiles[ev.created_by];
+      if (author) meta.push(`— ${esc(author.name)}`);
+
+      if (S.editingId === ev.id) {
+        h += `<div class="ev-item">
+          <div class="ev-bar" style="background:${color}"></div>
+          <div style="flex:1">
+            <div class="ev-form">
+              <div class="form-group"><label>Titre</label>
+                <input type="text" id="eTitle" value="${esc(ev.title)}">
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Heure</label>
+                  <input type="time" id="eTime" value="${ev.event_time ? ev.event_time.slice(0,5) : ''}">
+                </div>
+                <div class="form-group"><label>Lieu</label>
+                  <input type="text" id="eLoc" value="${esc(ev.location || '')}">
+                </div>
+              </div>
+              <div class="form-acts">
+                <button class="btn btn-primary btn-sm" style="flex:1" onclick="submitEdit('${ev.id}')">Enregistrer</button>
+                <button class="btn btn-ghost btn-sm" onclick="cancelEdit()">Annuler</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      } else {
+        h += `<div class="ev-item">
+          <div class="ev-bar" style="background:${color}"></div>
+          <div class="ev-info">
+            <div class="ev-title">${esc(ev.title)}</div>
+            ${meta.length ? `<div class="ev-meta">${meta.join(' ')}</div>` : ''}
+          </div>
+          ${own ? `<div class="ev-acts">
+            <button class="icon-btn" onclick="startEdit('${ev.id}')" title="Modifier">✏️</button>
+            <button class="icon-btn del" onclick="doDelete('${ev.id}')" title="Supprimer">🗑️</button>
+          </div>` : ''}
+        </div>`;
+      }
+    });
+  } else {
+    h += '<div class="no-ev">Aucun événement ce jour.</div>';
+  }
+
+  if (S.showForm && !S.editingId) {
+    h += `<div class="ev-form" id="addForm">
+      <div class="form-group"><label>Titre *</label>
+        <input type="text" id="nTitle" placeholder="ex : Appel vidéo">
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Heure</label><input type="time" id="nTime"></div>
+        <div class="form-group"><label>Lieu</label><input type="text" id="nLoc" placeholder="ex : Paris"></div>
+      </div>
+      <div class="form-acts">
+        <button class="btn btn-primary btn-sm" style="flex:1" onclick="submitAdd('${dateStr}')">Ajouter</button>
+        <button class="btn btn-ghost btn-sm" onclick="hideAddForm()">Annuler</button>
+      </div>
+    </div>`;
+  } else if (!S.showForm) {
+    h += `<button class="btn-add" onclick="showAddForm()"><span>+</span> Ajouter un événement</button>`;
+  }
+
+  document.getElementById('modalBody').innerHTML = h;
+  if (S.showForm) { const inp = document.getElementById('nTitle'); if (inp) inp.focus(); }
+}
+
+function showAddForm()  { S.showForm = true;  renderModalBody(); }
+function hideAddForm()  { S.showForm = false; renderModalBody(); }
+function startEdit(id)  { S.editingId = id; S.showForm = false; renderModalBody(); }
+function cancelEdit()   { S.editingId = null; renderModalBody(); }
+
+async function submitAdd(dateStr) {
+  const title = (document.getElementById('nTitle').value || '').trim();
+  if (!title) { toast('Le titre est requis', 'err'); return; }
+  const time = document.getElementById('nTime').value;
+  const loc  = (document.getElementById('nLoc').value || '').trim();
+  S.showForm = false;
+  try {
+    await createEvent({ title, event_date: dateStr, event_time: time || null, location: loc || null });
+    renderCalendar(); renderStats(); renderModalBody();
+    toast('Événement ajouté ✓', 'ok');
+  } catch (e) { S.showForm = true; toast(e.message, 'err'); }
+}
+
+async function submitEdit(id) {
+  const title = (document.getElementById('eTitle').value || '').trim();
+  if (!title) { toast('Le titre est requis', 'err'); return; }
+  const time = document.getElementById('eTime').value;
+  const loc  = (document.getElementById('eLoc').value || '').trim();
+  S.editingId = null;
+  try {
+    await updateEvent(id, { title, event_time: time || null, location: loc || null });
+    renderCalendar(); renderStats(); renderModalBody();
+    toast('Modifié ✓', 'ok');
+  } catch (e) { S.editingId = id; toast(e.message, 'err'); }
+}
+
+async function doDelete(id) {
+  if (!confirm('Supprimer cet événement ?')) return;
+  try {
+    await deleteEvent(id);
+    renderCalendar(); renderStats(); renderModalBody();
+    toast('Supprimé', '');
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════════════════════
+function buildStats() {
+  const today = ds(new Date());
+  const now   = new Date();
+
+  // Prochain événement
+  const upcoming = S.events.filter(e => e.event_date >= today)
+    .sort((a, b) => a.event_date.localeCompare(b.event_date));
+  const next = upcoming[0];
+  let nextH = '';
+
+  if (next) {
+    const d     = new Date(next.event_date + 'T12:00:00');
+    const diff  = Math.ceil((d - now) / 86400000);
+    const color = S.profiles[next.created_by]?.color || '#e8a87c';
+    const label = diff === 0 ? "Aujourd'hui !" : diff === 1 ? 'Demain' : `J−${diff}`;
+    nextH = `<div class="next-card" style="border-color:${color}40">
+      <div class="next-date">${d.toLocaleDateString('fr-FR', { day:'numeric', month:'long' })}</div>
+      <div class="next-title">${esc(next.title)}</div>
+      ${next.location ? `<div class="next-loc">📍 ${esc(next.location)}</div>` : ''}
+      <div class="countdown">${label}</div>
+      ${diff > 1 ? '<div class="countdown-lbl">jours restants</div>' : ''}
+    </div>`;
+  } else {
+    nextH = '<div class="empty-msg">Aucun événement à venir.</div>';
+  }
+
+  // Stats du mois affiché
+  const mStr  = `${S.year}-${String(S.month+1).padStart(2,'0')}`;
+  const mEvs  = S.events.filter(e => e.event_date.startsWith(mStr));
+  const total = mEvs.length;
+  const byUid = {};
+  mEvs.forEach(e => { byUid[e.created_by] = (byUid[e.created_by] || 0) + 1; });
+
+  let barsH = '';
+  Object.values(S.profiles).forEach(p => {
+    const cnt = byUid[p.id] || 0;
+    const pct = total > 0 ? (cnt / total * 100).toFixed(0) : 0;
+    barsH += `<div class="user-stat">
+      <div class="us-header">
+        <div class="us-name"><div class="us-dot" style="background:${p.color}"></div>${esc(p.name)}</div>
+        <div class="us-count">${cnt}</div>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${p.color}"></div></div>
+    </div>`;
+  });
+  if (!barsH) barsH = '<div class="empty-msg">Aucun événement ce mois.</div>';
+
+  // Ajouts récents
+  const recent = [...S.events].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 4);
+  let recH = '';
+  recent.forEach(ev => {
+    const d  = new Date(ev.event_date + 'T12:00:00');
+    const p  = S.profiles[ev.created_by];
+    recH += `<div class="recent-ev">
+      <div class="recent-title" style="border-left-color:${p?.color || '#e8a87c'}">${esc(ev.title)}</div>
+      <div class="recent-meta">${d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}${p ? ' · ' + esc(p.name) : ''}</div>
+    </div>`;
+  });
+
+  return `
+    <div class="sb-section">
+      <div class="sb-title">Prochain rendez-vous</div>${nextH}
+    </div>
+    <div class="sb-section">
+      <div class="sb-title">${MONTHS[S.month]} — ${total} événement${total !== 1 ? 's' : ''}</div>${barsH}
+    </div>
+    ${recH ? `<div class="sb-section"><div class="sb-title">Ajouts récents</div>${recH}</div>` : ''}
+  `;
+}
+
+function renderStats() {
+  const h = buildStats();
+  document.getElementById('sidebarContent').innerHTML = h;
+  document.getElementById('drawerContent').innerHTML  = h;
+}
+
+// ═══════════════════════════════════════════════════════════
+// DRAWER
+// ═══════════════════════════════════════════════════════════
+function openDrawer()  {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOv').classList.add('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOv').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCREEN
+// ═══════════════════════════════════════════════════════════
+function showScreen(name) {
+  const map = { auth: 'auth-screen', profile: 'profile-screen', app: 'app' };
+  Object.entries(map).forEach(([k, id]) => {
+    document.getElementById(id).classList.toggle('active', k === name);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+(async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) { S.session = session; await afterLogin(); }
+  else { showScreen('auth'); }
+
+  sb.auth.onAuthStateChange((event) => {
+    if (event === 'SIGNED_OUT') { showScreen('auth'); }
+  });
+})();
+</script>
+</body>
+</html>
