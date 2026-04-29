@@ -434,12 +434,12 @@
     </div>
     <form id="authForm" onsubmit="handleAuth(event)">
       <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="authEmail" autocomplete="email" required>
+        <label>Identifiant</label>
+        <input type="text" id="authId" autocomplete="username" required>
       </div>
       <div class="form-group">
         <label>Mot de passe</label>
-        <input type="password" id="authPwd" autocomplete="current-password" minlength="6" required>
+        <input type="password" id="authPwd" autocomplete="current-password" required>
       </div>
       <button class="btn btn-primary" id="authBtn" type="submit">Se connecter</button>
       <div id="authMsg"></div>
@@ -595,9 +595,11 @@ function switchTab(mode) {
   document.getElementById('authMsg').textContent = '';
 }
 
+function idToEmail(id) { return `${id.toLowerCase().trim()}@calendrier.app`; }
+
 async function handleAuth(e) {
   e.preventDefault();
-  const email = document.getElementById('authEmail').value.trim();
+  const email = idToEmail(document.getElementById('authId').value.trim());
   const pwd   = document.getElementById('authPwd').value;
   const btn   = document.getElementById('authBtn');
   const msg   = document.getElementById('authMsg');
