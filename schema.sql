@@ -65,6 +65,16 @@ CREATE TRIGGER events_updated_at
 ALTER PUBLICATION supabase_realtime ADD TABLE events;
 
 -- ============================================================
+-- MIGRATION : Nouveaux champs événements
+-- À exécuter dans Supabase Dashboard > SQL Editor
+-- ============================================================
+
+ALTER TABLE events ADD COLUMN IF NOT EXISTS category    TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS notes       TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS end_time    TIME;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS is_irl      BOOLEAN DEFAULT false;
+
+-- ============================================================
 -- IMPORTANT : Dans Supabase Dashboard
 -- > Authentication > Settings > Email
 -- Désactiver "Enable email confirmations"

@@ -468,6 +468,72 @@
     }
     .btn-add:hover { border-color: var(--caen); color: var(--caen); background: rgba(240,180,130,.1); }
 
+    /* ── Category picker ──────────────────────────────────── */
+    .cat-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 2px;
+    }
+    .cat-opt {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 8px 4px; border-radius: 8px; cursor: pointer;
+      border: 1px solid var(--border); background: rgba(255,255,255,.03);
+      font-family: inherit; transition: all .18s; color: var(--text-dim); font-size: 11px;
+      letter-spacing: .04em;
+    }
+    .cat-opt .cat-emoji { font-size: 20px; line-height: 1; }
+    .cat-opt:hover { border-color: var(--border-hi); background: rgba(255,255,255,.07); color: var(--text); }
+    .cat-opt.selected {
+      border-color: var(--caen); background: rgba(240,180,130,.12);
+      color: var(--caen); box-shadow: 0 0 0 1px var(--caen) inset;
+    }
+
+    /* ── IRL toggle ───────────────────────────────────────── */
+    .irl-toggle {
+      display: flex; border-radius: 8px; border: 1px solid var(--border);
+      overflow: hidden; margin-top: 2px;
+    }
+    .irl-opt {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 9px 8px; cursor: pointer; font-family: inherit; font-size: 12px;
+      font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+      border: none; background: rgba(255,255,255,.03); color: var(--text-dim);
+      transition: all .18s;
+    }
+    .irl-opt:hover { background: rgba(255,255,255,.07); color: var(--text); }
+    .irl-opt.selected-irl { background: rgba(61,217,217,.12); color: var(--lr); }
+    .irl-opt.selected-remote { background: rgba(240,180,130,.1); color: var(--caen); }
+
+    /* ── Notes textarea ───────────────────────────────────── */
+    textarea.ev-notes {
+      width: 100%; min-height: 64px; resize: vertical;
+      background: rgba(255,255,255,.05); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-family: inherit;
+      font-size: 13px; padding: 10px 12px; box-sizing: border-box;
+      line-height: 1.5; transition: border-color .2s; outline: none;
+    }
+    textarea.ev-notes:focus { border-color: var(--border-hi); }
+    textarea.ev-notes::placeholder { color: var(--text-dim); }
+
+    /* ── Event display enhancements ───────────────────────── */
+    .ev-cat-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 20px; margin-bottom: 5px;
+      background: rgba(255,255,255,.06); color: var(--text-dim); border: 1px solid var(--border);
+    }
+    .ev-cat-badge .badge-emoji { font-size: 13px; }
+    .ev-notes-txt {
+      font-size: 12px; color: var(--text-dim); font-style: italic;
+      margin-top: 4px; line-height: 1.5; border-left: 2px solid var(--border);
+      padding-left: 8px;
+    }
+    .irl-badge {
+      display: inline-flex; align-items: center; gap: 3px; font-size: 10px;
+      font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      padding: 2px 6px; border-radius: 10px; margin-left: 6px;
+    }
+    .irl-badge.irl  { background: rgba(61,217,217,.15); color: var(--lr); border: 1px solid rgba(61,217,217,.25); }
+    .irl-badge.remote { background: rgba(240,180,130,.12); color: var(--caen); border: 1px solid rgba(240,180,130,.2); }
+
     /* ── Toast ──────────────────────────────────────────── */
     .toast {
       position: fixed; bottom: 28px; left: 50%;
@@ -483,12 +549,103 @@
     .toast.ok   { border-color: rgba(94,206,206,.4); }
     .toast.err  { border-color: rgba(224,120,120,.4); }
 
+    /* ── Sidebar tabs ───────────────────────────────────── */
+    .sb-tabs {
+      display: flex; gap: 6px; margin-bottom: 20px;
+      background: rgba(255,255,255,.03); border: 1px solid var(--border);
+      border-radius: 10px; padding: 4px;
+    }
+    .sb-tab {
+      flex: 1; padding: 7px 10px; font-family: inherit; font-size: 11px;
+      font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      border: none; border-radius: 7px; cursor: pointer; transition: all .2s;
+      color: var(--text-dim); background: transparent;
+    }
+    .sb-tab.active { background: var(--surface-2); color: var(--text-bright); }
+    .sb-tab:hover:not(.active) { color: var(--text); }
+
+    /* ── Planning section ───────────────────────────────── */
+    .planning-section {
+      flex: 1; overflow-y: auto; padding: 20px 32px;
+      display: none; flex-direction: column; min-width: 0;
+    }
+    .planning-section.active { display: flex; }
+
+    .plan-month-hd {
+      font-family: 'Cormorant Garamond', serif; font-size: 26px;
+      color: var(--text-bright); font-weight: 600; text-transform: capitalize;
+      margin: 24px 0 10px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .plan-month-hd:first-child { margin-top: 0; }
+
+    .plan-ev {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 14px; border-radius: 11px; cursor: pointer;
+      border: 1px solid var(--border); background: rgba(11,23,36,.8);
+      margin-bottom: 6px; transition: all .18s;
+    }
+    .plan-ev:hover {
+      border-color: rgba(190,175,145,.3); background: var(--surface-2);
+      transform: translateX(3px);
+    }
+    .plan-ev-emoji {
+      font-size: 22px; width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,.05); flex-shrink: 0;
+    }
+    .plan-ev-bar {
+      width: 3px; border-radius: 2px; align-self: stretch;
+      min-height: 36px; flex-shrink: 0;
+    }
+    .plan-ev-info { flex: 1; min-width: 0; }
+    .plan-ev-title {
+      font-size: 14px; font-weight: 600; color: var(--text-bright);
+      margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .plan-ev-meta { font-size: 11px; color: var(--text-dim); }
+    .plan-empty {
+      color: var(--text-dim); font-size: 13px; font-style: italic;
+      text-align: center; padding: 40px 0;
+    }
+    .plan-past-sep {
+      text-align: center; font-size: 11px; font-weight: 700;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim);
+      margin: 24px 0 8px; position: relative;
+    }
+    .plan-past-sep::before, .plan-past-sep::after {
+      content: ''; position: absolute; top: 50%; width: 30%; height: 1px;
+      background: var(--border);
+    }
+    .plan-past-sep::before { left: 0; }
+    .plan-past-sep::after { right: 0; }
+
+    /* ── Bottom nav (mobile) ────────────────────────────── */
+    .bottom-nav {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0;
+      height: 60px; background: rgba(8,17,30,.97);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(12px); z-index: 100;
+    }
+    .bnav-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 3px; border: none; background: none;
+      cursor: pointer; font-family: inherit; color: var(--text-dim);
+      transition: color .2s; padding: 8px 0;
+    }
+    .bnav-btn.active { color: var(--caen); }
+    .bnav-icon { font-size: 20px; line-height: 1; }
+    .bnav-label { font-size: 9px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+
     /* ── Responsive ─────────────────────────────────────── */
     @media (max-width: 900px) {
       .sidebar     { display: none; }
       .hamburger   { display: flex; }
       .cal-section { padding: 20px 14px; }
       .month-title { font-size: 26px; }
+      .bottom-nav  { display: flex; }
+      .app-body    { padding-bottom: 60px; }
+      .planning-section { padding: 16px 14px 80px; }
     }
     @media (max-width: 600px) {
       .cal-section {
@@ -628,7 +785,7 @@
   <div class="app-body">
 
     <!-- Calendar -->
-    <main class="cal-section">
+    <main class="cal-section" id="calSection">
       <div class="month-nav">
         <button class="nav-btn" onclick="changeMonth(-1)">&#8249;</button>
         <div class="month-title" id="monthTitle"></div>
@@ -645,13 +802,34 @@
       </div>
     </main>
 
+    <!-- Planning (mobile view) -->
+    <section class="planning-section" id="planningSection">
+      <div id="planningContent"></div>
+    </section>
+
     <!-- Sidebar (PC) -->
     <aside class="sidebar" id="sidebar">
+      <div class="sb-tabs">
+        <button class="sb-tab active" id="sbTabStats"    onclick="switchSbTab('stats')">📊 Stats</button>
+        <button class="sb-tab"        id="sbTabPlanning" onclick="switchSbTab('planning')">📋 Planning</button>
+      </div>
       <div id="sidebarContent"></div>
     </aside>
   </div>
 
 </div><!-- #app -->
+
+<!-- ── Bottom nav (mobile) ──────────────────────────────── -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bnav-btn active" id="bnavCal"  onclick="switchView('calendar')">
+    <span class="bnav-icon">📅</span>
+    <span class="bnav-label">Calendrier</span>
+  </button>
+  <button class="bnav-btn" id="bnavPlan" onclick="switchView('planning')">
+    <span class="bnav-icon">📋</span>
+    <span class="bnav-label">Planning</span>
+  </button>
+</nav>
 
 <!-- ── Drawer (mobile) ──────────────────────────────────── -->
 <div class="drawer-overlay" id="drawerOv" onclick="closeDrawer()"></div>
@@ -699,6 +877,16 @@ const SUPA_URL = 'https://ttuisauvkjqldkmejgtg.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0dWlzYXV2a2pxbGRrbWVqZ3RnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNjQwOTYsImV4cCI6MjA4OTk0MDA5Nn0.aKikyVTGl6HVSVrKngGA-LR5VMMiTg37DFwJ0V7GW0A';
 const CITY_COLORS = { 'Caen': '#e8a87c', 'La Rochette': '#7ec8c8' };
 const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+const CATEGORIES = [
+  { id: 'call',      emoji: '📞', label: 'Appel' },
+  { id: 'visit',     emoji: '🚂', label: 'Visite' },
+  { id: 'night',     emoji: '🌙', label: 'Soirée' },
+  { id: 'restaurant',emoji: '🍽️', label: 'Repas' },
+  { id: 'birthday',  emoji: '🎂', label: 'Anniv.' },
+  { id: 'travel',    emoji: '✈️', label: 'Voyage' },
+  { id: 'movie',     emoji: '🎬', label: 'Film' },
+  { id: 'other',     emoji: '📌', label: 'Autre' },
+];
 
 const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
@@ -710,7 +898,8 @@ const S = {
   events: [], year: new Date().getFullYear(),
   month: new Date().getMonth(),
   selectedDate: null, editingId: null, showForm: false,
-  channel: null, selectedCity: ''
+  channel: null, selectedCity: '',
+  view: 'calendar', sbTab: 'stats'
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -1000,8 +1189,10 @@ function renderCalendar() {
     // Chips (desktop) + dots (mobile)
     const chips = evs.slice(0, 3).map(ev => {
       const color = S.profiles[ev.created_by]?.color || '#ffaa5e';
-      const title = ev.title.length > 10 ? ev.title.slice(0, 9) + '…' : ev.title;
-      return `<div class="day-chip" style="background:${color}22;border-left-color:${color};color:${color}">${esc(title)}</div>`;
+      const cat = CATEGORIES.find(c => c.id === ev.category);
+      const prefix = cat ? cat.emoji + ' ' : '';
+      const title = ev.title.length > 9 ? ev.title.slice(0, 8) + '…' : ev.title;
+      return `<div class="day-chip" style="background:${color}22;border-left-color:${color};color:${color}">${prefix}${esc(title)}</div>`;
     }).join('');
 
     const dots = evs.slice(0, 3).map(ev => {
@@ -1055,26 +1246,49 @@ function renderModalBody() {
       const color = S.profiles[ev.created_by]?.color || '#e8a87c';
       const own   = ev.created_by === uid;
       let meta = [];
-      if (ev.event_time) meta.push(`🕐 ${ev.event_time.slice(0,5)}`);
+      if (ev.event_time) meta.push(`🕐 ${ev.event_time.slice(0,5)}${ev.end_time ? ' → ' + ev.end_time.slice(0,5) : ''}`);
       if (ev.location)   meta.push(`📍 ${esc(ev.location)}`);
       const author = S.profiles[ev.created_by];
       if (author) meta.push(`— ${esc(author.name)}`);
 
       if (S.editingId === ev.id) {
+        const eCatGrid = CATEGORIES.map(c =>
+          `<button type="button" class="cat-opt${ev.category === c.id ? ' selected' : ''}" data-cat="${c.id}" onclick="pickCat('${c.id}','e')">
+            <span class="cat-emoji">${c.emoji}</span><span>${c.label}</span>
+          </button>`
+        ).join('');
+        const eIrlVal = ev.is_irl === true ? 'true' : ev.is_irl === false ? 'false' : '';
         h += `<div class="ev-item">
           <div class="ev-bar" style="background:${color}"></div>
           <div style="flex:1">
             <div class="ev-form">
+              <div class="form-group"><label>Catégorie</label>
+                <div class="cat-grid" id="eCatGrid">${eCatGrid}</div>
+                <input type="hidden" id="eCat" value="${esc(ev.category || '')}">
+              </div>
               <div class="form-group"><label>Titre</label>
                 <input type="text" id="eTitle" value="${esc(ev.title)}">
               </div>
               <div class="form-row">
-                <div class="form-group"><label>Heure</label>
+                <div class="form-group"><label>Début</label>
                   <input type="time" id="eTime" value="${ev.event_time ? ev.event_time.slice(0,5) : ''}">
                 </div>
-                <div class="form-group"><label>Lieu</label>
-                  <input type="text" id="eLoc" value="${esc(ev.location || '')}">
+                <div class="form-group"><label>Fin</label>
+                  <input type="time" id="eEndTime" value="${ev.end_time ? ev.end_time.slice(0,5) : ''}">
                 </div>
+              </div>
+              <div class="form-group"><label>Lieu</label>
+                <input type="text" id="eLoc" value="${esc(ev.location || '')}">
+              </div>
+              <div class="form-group"><label>En vrai ou à distance ?</label>
+                <div class="irl-toggle">
+                  <button type="button" class="irl-opt${eIrlVal==='true' ? ' selected-irl' : ''}" id="eIrlBtnIrl" onclick="pickIrl(true,'e')">🏠 En vrai</button>
+                  <button type="button" class="irl-opt${eIrlVal==='false' ? ' selected-remote' : ''}" id="eIrlBtnRemote" onclick="pickIrl(false,'e')">💻 À distance</button>
+                </div>
+                <input type="hidden" id="eIrl" value="${eIrlVal}">
+              </div>
+              <div class="form-group"><label>Note</label>
+                <textarea class="ev-notes" id="eNotes" placeholder="Un petit mot doux…">${esc(ev.notes || '')}</textarea>
               </div>
               <div class="form-acts">
                 <button class="btn btn-primary btn-sm" style="flex:1" onclick="submitEdit('${ev.id}')">Enregistrer</button>
@@ -1084,11 +1298,19 @@ function renderModalBody() {
           </div>
         </div>`;
       } else {
+        const cat = CATEGORIES.find(c => c.id === ev.category);
+        const irlBadge = ev.is_irl === true
+          ? `<span class="irl-badge irl">🏠 IRL</span>`
+          : ev.is_irl === false
+            ? `<span class="irl-badge remote">💻 Distance</span>`
+            : '';
         h += `<div class="ev-item">
           <div class="ev-bar" style="background:${color}"></div>
           <div class="ev-info">
-            <div class="ev-title">${esc(ev.title)}</div>
+            ${cat ? `<div class="ev-cat-badge"><span class="badge-emoji">${cat.emoji}</span>${cat.label}</div>` : ''}
+            <div class="ev-title">${esc(ev.title)}${irlBadge}</div>
             ${meta.length ? `<div class="ev-meta">${meta.join(' ')}</div>` : ''}
+            ${ev.notes ? `<div class="ev-notes-txt">${esc(ev.notes)}</div>` : ''}
           </div>
           ${own ? `<div class="ev-acts">
             <button class="icon-btn" onclick="startEdit('${ev.id}')" title="Modifier">✏️</button>
@@ -1102,13 +1324,35 @@ function renderModalBody() {
   }
 
   if (S.showForm && !S.editingId) {
+    const catGrid = CATEGORIES.map(c =>
+      `<button type="button" class="cat-opt" data-cat="${c.id}" onclick="pickCat('${c.id}')">
+        <span class="cat-emoji">${c.emoji}</span><span>${c.label}</span>
+      </button>`
+    ).join('');
     h += `<div class="ev-form" id="addForm">
+      <div class="form-group"><label>Catégorie</label>
+        <div class="cat-grid" id="catGrid">${catGrid}</div>
+        <input type="hidden" id="nCat">
+      </div>
       <div class="form-group"><label>Titre *</label>
         <input type="text" id="nTitle" placeholder="ex : Appel vidéo">
       </div>
       <div class="form-row">
-        <div class="form-group"><label>Heure</label><input type="time" id="nTime"></div>
-        <div class="form-group"><label>Lieu</label><input type="text" id="nLoc" placeholder="ex : Paris"></div>
+        <div class="form-group"><label>Début</label><input type="time" id="nTime"></div>
+        <div class="form-group"><label>Fin</label><input type="time" id="nEndTime"></div>
+      </div>
+      <div class="form-group"><label>Lieu</label>
+        <input type="text" id="nLoc" placeholder="ex : Paris">
+      </div>
+      <div class="form-group"><label>En vrai ou à distance ?</label>
+        <div class="irl-toggle">
+          <button type="button" class="irl-opt" id="irlBtnIrl" onclick="pickIrl(true)">🏠 En vrai</button>
+          <button type="button" class="irl-opt" id="irlBtnRemote" onclick="pickIrl(false)">💻 À distance</button>
+        </div>
+        <input type="hidden" id="nIrl" value="">
+      </div>
+      <div class="form-group"><label>Note</label>
+        <textarea class="ev-notes" id="nNotes" placeholder="Un petit mot doux…"></textarea>
       </div>
       <div class="form-acts">
         <button class="btn btn-primary btn-sm" style="flex:1" onclick="submitAdd('${dateStr}')">Ajouter</button>
@@ -1128,14 +1372,53 @@ function hideAddForm()  { S.showForm = false; renderModalBody(); }
 function startEdit(id)  { S.editingId = id; S.showForm = false; renderModalBody(); }
 function cancelEdit()   { S.editingId = null; renderModalBody(); }
 
+function pickCat(id, prefix = 'n') {
+  const gridId = prefix === 'e' ? 'eCatGrid' : 'catGrid';
+  const inputId = prefix === 'e' ? 'eCat' : 'nCat';
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  grid.querySelectorAll('.cat-opt').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.cat === id);
+  });
+  document.getElementById(inputId).value = id;
+}
+
+function pickIrl(val, prefix = 'n') {
+  const btnIrl    = document.getElementById(prefix === 'e' ? 'eIrlBtnIrl'    : 'irlBtnIrl');
+  const btnRemote = document.getElementById(prefix === 'e' ? 'eIrlBtnRemote' : 'irlBtnRemote');
+  const input     = document.getElementById(prefix === 'e' ? 'eIrl'          : 'nIrl');
+  if (!btnIrl || !btnRemote || !input) return;
+  const current = input.value;
+  if ((val === true && current === 'true') || (val === false && current === 'false')) {
+    // deselect
+    btnIrl.className = 'irl-opt';
+    btnRemote.className = 'irl-opt';
+    input.value = '';
+  } else {
+    btnIrl.className    = 'irl-opt' + (val === true  ? ' selected-irl'    : '');
+    btnRemote.className = 'irl-opt' + (val === false ? ' selected-remote' : '');
+    input.value = val ? 'true' : 'false';
+  }
+}
+
 async function submitAdd(dateStr) {
   const title = (document.getElementById('nTitle').value || '').trim();
   if (!title) { toast('Le titre est requis', 'err'); return; }
-  const time = document.getElementById('nTime').value;
-  const loc  = (document.getElementById('nLoc').value || '').trim();
+  const time    = document.getElementById('nTime').value;
+  const endTime = document.getElementById('nEndTime').value;
+  const loc     = (document.getElementById('nLoc').value || '').trim();
+  const cat     = document.getElementById('nCat').value;
+  const notes   = (document.getElementById('nNotes').value || '').trim();
+  const irlRaw  = document.getElementById('nIrl').value;
+  const is_irl  = irlRaw === 'true' ? true : irlRaw === 'false' ? false : null;
   S.showForm = false;
   try {
-    await createEvent({ title, event_date: dateStr, event_time: time || null, location: loc || null });
+    await createEvent({
+      title, event_date: dateStr,
+      event_time: time || null, end_time: endTime || null,
+      location: loc || null, category: cat || null,
+      notes: notes || null, is_irl
+    });
     renderCalendar(); renderStats(); renderModalBody();
     toast('Événement ajouté ✓', 'ok');
   } catch (e) { S.showForm = true; toast(e.message, 'err'); }
@@ -1144,11 +1427,20 @@ async function submitAdd(dateStr) {
 async function submitEdit(id) {
   const title = (document.getElementById('eTitle').value || '').trim();
   if (!title) { toast('Le titre est requis', 'err'); return; }
-  const time = document.getElementById('eTime').value;
-  const loc  = (document.getElementById('eLoc').value || '').trim();
+  const time    = document.getElementById('eTime').value;
+  const endTime = document.getElementById('eEndTime').value;
+  const loc     = (document.getElementById('eLoc').value || '').trim();
+  const cat     = document.getElementById('eCat').value;
+  const notes   = (document.getElementById('eNotes').value || '').trim();
+  const irlRaw  = document.getElementById('eIrl').value;
+  const is_irl  = irlRaw === 'true' ? true : irlRaw === 'false' ? false : null;
   S.editingId = null;
   try {
-    await updateEvent(id, { title, event_time: time || null, location: loc || null });
+    await updateEvent(id, {
+      title, event_time: time || null, end_time: endTime || null,
+      location: loc || null, category: cat || null,
+      notes: notes || null, is_irl
+    });
     renderCalendar(); renderStats(); renderModalBody();
     toast('Modifié ✓', 'ok');
   } catch (e) { S.editingId = id; toast(e.message, 'err'); }
@@ -1237,9 +1529,103 @@ function buildStats() {
 }
 
 function renderStats() {
-  const h = buildStats();
-  document.getElementById('sidebarContent').innerHTML = h;
-  document.getElementById('drawerContent').innerHTML  = h;
+  document.getElementById('drawerContent').innerHTML = buildStats();
+  if (S.sbTab === 'stats') {
+    document.getElementById('sidebarContent').innerHTML = buildStats();
+  } else {
+    document.getElementById('sidebarContent').innerHTML = buildPlanning();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// VIEW SWITCH
+// ═══════════════════════════════════════════════════════════
+function switchView(v) {
+  S.view = v;
+  const calSection      = document.getElementById('calSection');
+  const planningSection = document.getElementById('planningSection');
+  const bnavCal         = document.getElementById('bnavCal');
+  const bnavPlan        = document.getElementById('bnavPlan');
+
+  if (v === 'planning') {
+    calSection.style.display      = 'none';
+    planningSection.classList.add('active');
+    bnavCal.classList.remove('active');
+    bnavPlan.classList.add('active');
+    document.getElementById('planningContent').innerHTML = buildPlanning();
+  } else {
+    calSection.style.display      = '';
+    planningSection.classList.remove('active');
+    bnavCal.classList.add('active');
+    bnavPlan.classList.remove('active');
+  }
+}
+
+function switchSbTab(tab) {
+  S.sbTab = tab;
+  document.getElementById('sbTabStats').classList.toggle('active',    tab === 'stats');
+  document.getElementById('sbTabPlanning').classList.toggle('active', tab === 'planning');
+  document.getElementById('sidebarContent').innerHTML =
+    tab === 'stats' ? buildStats() : buildPlanning();
+}
+
+function buildPlanning() {
+  const today = ds(new Date());
+  const upcoming = S.events.filter(e => e.event_date >= today)
+    .sort((a, b) => a.event_date.localeCompare(b.event_date));
+  const past = S.events.filter(e => e.event_date < today)
+    .sort((a, b) => b.event_date.localeCompare(a.event_date))
+    .slice(0, 5);
+
+  if (!upcoming.length && !past.length) {
+    return '<div class="plan-empty">Aucun événement pour l\'instant.</div>';
+  }
+
+  function evHTML(ev) {
+    const color  = S.profiles[ev.created_by]?.color || '#e8a87c';
+    const cat    = CATEGORIES.find(c => c.id === ev.category);
+    const d      = new Date(ev.event_date + 'T12:00:00');
+    const label  = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    const time   = ev.event_time ? ' · ' + ev.event_time.slice(0, 5) : '';
+    const loc    = ev.location   ? ' · 📍' + esc(ev.location) : '';
+    const irlBadge = ev.is_irl === true
+      ? `<span class="irl-badge irl" style="font-size:9px;padding:1px 5px">🏠</span>`
+      : ev.is_irl === false
+        ? `<span class="irl-badge remote" style="font-size:9px;padding:1px 5px">💻</span>`
+        : '';
+    return `<div class="plan-ev" onclick="openModalByDate('${ev.event_date}')">
+      <div class="plan-ev-bar" style="background:${color}"></div>
+      <div class="plan-ev-emoji">${cat ? cat.emoji : '📅'}</div>
+      <div class="plan-ev-info">
+        <div class="plan-ev-title">${esc(ev.title)} ${irlBadge}</div>
+        <div class="plan-ev-meta">${label}${time}${loc}</div>
+      </div>
+    </div>`;
+  }
+
+  // Grouper par mois
+  let h = '';
+  let lastMonth = '';
+  upcoming.forEach(ev => {
+    const m = ev.event_date.slice(0, 7);
+    if (m !== lastMonth) {
+      const d = new Date(ev.event_date + 'T12:00:00');
+      h += `<div class="plan-month-hd">${d.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}</div>`;
+      lastMonth = m;
+    }
+    h += evHTML(ev);
+  });
+
+  if (past.length) {
+    h += `<div class="plan-past-sep">Passés</div>`;
+    past.forEach(ev => { h += evHTML(ev); });
+  }
+
+  return h;
+}
+
+function openModalByDate(dateStr) {
+  openModal(new Date(dateStr + 'T12:00:00'));
 }
 
 // ═══════════════════════════════════════════════════════════
