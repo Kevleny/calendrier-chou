@@ -1684,6 +1684,33 @@ function handleTodayClick(e) {
   if (e.target === document.getElementById('todayOv')) closeTodayPopup();
 }
 
+// ═══════════════════════════════════════════════════════════
+// SWIPE CALENDRIER
+// ═══════════════════════════════════════════════════════════
+(function() {
+  let startX = 0, startY = 0;
+  const THRESHOLD = 50; // px minimum pour valider le swipe
+
+  document.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    if (S.view !== 'calendar') return; // pas actif en vue planning
+    if (document.getElementById('modalOv').classList.contains('open')) return;
+    if (document.getElementById('drawer').classList.contains('open')) return;
+
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+
+    if (Math.abs(dx) < THRESHOLD) return;       // trop court
+    if (Math.abs(dy) > Math.abs(dx)) return;    // mouvement vertical → scroll
+
+    changeMonth(dx > 0 ? 1 : -1);
+  }, { passive: true });
+})();
+
 function openDrawer()  {
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawerOv').classList.add('open');
