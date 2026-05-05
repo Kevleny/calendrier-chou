@@ -255,6 +255,14 @@
       border-color: var(--caen); color: var(--caen);
       box-shadow: 0 0 12px rgba(240,180,130,.2);
     }
+    .today-btn {
+      font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text-dim); cursor: pointer;
+      font-family: inherit; transition: all .2s;
+    }
+    .today-btn:hover { border-color: var(--caen); color: var(--caen); }
+    .today-btn.current-month { opacity: .35; pointer-events: none; }
 
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
     .cal-hd {
@@ -499,7 +507,7 @@
       transition: all .18s;
     }
     .irl-opt:hover { background: rgba(255,255,255,.07); color: var(--text); }
-    .irl-opt.selected-irl { background: rgba(61,217,217,.12); color: var(--lr); }
+    .irl-opt.selected-irl { background: rgba(61,217,217,.12); color: var(--rochette); }
     .irl-opt.selected-remote { background: rgba(240,180,130,.1); color: var(--caen); }
 
     /* ── Notes textarea ───────────────────────────────────── */
@@ -531,7 +539,7 @@
       font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
       padding: 2px 6px; border-radius: 10px; margin-left: 6px;
     }
-    .irl-badge.irl  { background: rgba(61,217,217,.15); color: var(--lr); border: 1px solid rgba(61,217,217,.25); }
+    .irl-badge.irl  { background: rgba(61,217,217,.15); color: var(--rochette); border: 1px solid rgba(61,217,217,.25); }
     .irl-badge.remote { background: rgba(240,180,130,.12); color: var(--caen); border: 1px solid rgba(240,180,130,.2); }
 
     /* ── Toast ──────────────────────────────────────────── */
@@ -789,6 +797,7 @@
       <div class="month-nav">
         <button class="nav-btn" onclick="changeMonth(-1)">&#8249;</button>
         <div class="month-title" id="monthTitle"></div>
+        <button class="today-btn" id="todayBtn" onclick="goToToday()">Auj.</button>
         <button class="nav-btn" onclick="changeMonth(1)">&#8250;</button>
       </div>
       <div class="cal-grid" id="calGrid">
@@ -1170,7 +1179,10 @@ function calDays(y, m) {
 
 function renderCalendar() {
   const today = ds(new Date());
+  const now = new Date();
   document.getElementById('monthTitle').textContent = `${MONTHS[S.month]} ${S.year}`;
+  const isCurrentMonth = S.year === now.getFullYear() && S.month === now.getMonth();
+  document.getElementById('todayBtn').classList.toggle('current-month', isCurrentMonth);
 
   const grid = document.getElementById('calGrid');
   // Remove all day cells (keep headers = first 7 children)
@@ -1210,6 +1222,14 @@ function changeMonth(dir) {
   S.month += dir;
   if (S.month > 11) { S.month = 0; S.year++; }
   if (S.month < 0)  { S.month = 11; S.year--; }
+  renderCalendar();
+  renderStats();
+}
+
+function goToToday() {
+  const now = new Date();
+  S.year  = now.getFullYear();
+  S.month = now.getMonth();
   renderCalendar();
   renderStats();
 }
@@ -1267,7 +1287,7 @@ function renderModalBody() {
                 <input type="hidden" id="eCat" value="${esc(ev.category || '')}">
               </div>
               <div class="form-group"><label>Titre</label>
-                <input type="text" id="eTitle" value="${esc(ev.title)}">
+                <input type="text" id="eTitle" value="${esc(ev.title)}" maxlength="60">
               </div>
               <div class="form-row">
                 <div class="form-group"><label>Début</label>
@@ -1335,7 +1355,7 @@ function renderModalBody() {
         <input type="hidden" id="nCat">
       </div>
       <div class="form-group"><label>Titre *</label>
-        <input type="text" id="nTitle" placeholder="ex : Appel vidéo">
+        <input type="text" id="nTitle" placeholder="ex : Appel vidéo" maxlength="60">
       </div>
       <div class="form-row">
         <div class="form-group"><label>Début</label><input type="time" id="nTime"></div>
@@ -1406,6 +1426,7 @@ async function submitAdd(dateStr) {
   if (!title) { toast('Le titre est requis', 'err'); return; }
   const time    = document.getElementById('nTime').value;
   const endTime = document.getElementById('nEndTime').value;
+  if (time && endTime && endTime <= time) { toast('L\'heure de fin doit être après le début', 'err'); return; }
   const loc     = (document.getElementById('nLoc').value || '').trim();
   const cat     = document.getElementById('nCat').value;
   const notes   = (document.getElementById('nNotes').value || '').trim();
@@ -1429,6 +1450,7 @@ async function submitEdit(id) {
   if (!title) { toast('Le titre est requis', 'err'); return; }
   const time    = document.getElementById('eTime').value;
   const endTime = document.getElementById('eEndTime').value;
+  if (time && endTime && endTime <= time) { toast('L\'heure de fin doit être après le début', 'err'); return; }
   const loc     = (document.getElementById('eLoc').value || '').trim();
   const cat     = document.getElementById('eCat').value;
   const notes   = (document.getElementById('eNotes').value || '').trim();
@@ -1529,12 +1551,10 @@ function buildStats() {
 }
 
 function renderStats() {
-  document.getElementById('drawerContent').innerHTML = buildStats();
-  if (S.sbTab === 'stats') {
-    document.getElementById('sidebarContent').innerHTML = buildStats();
-  } else {
-    document.getElementById('sidebarContent').innerHTML = buildPlanning();
-  }
+  const statsH = buildStats();
+  document.getElementById('drawerContent').innerHTML = statsH;
+  document.getElementById('sidebarContent').innerHTML =
+    S.sbTab === 'stats' ? statsH : buildPlanning();
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1629,10 +1649,7 @@ function openModalByDate(dateStr) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// DRAWER
-// ═══════════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════════
-// POPUP AUJOURD'HUI
+// DRAWER & POPUP AUJOURD'HUI
 // ═══════════════════════════════════════════════════════════
 function checkTodayEvents() {
   const today = new Date();
@@ -1655,7 +1672,7 @@ function checkTodayEvents() {
     const profile = S.profiles[ev.created_by];
     const color   = profile?.color || '#ffaa5e';
     let meta = [];
-    if (ev.event_time) meta.push(`🕐 ${ev.event_time.slice(0,5)}`);
+    if (ev.event_time) meta.push(`🕐 ${ev.event_time.slice(0,5)}${ev.end_time ? ' → ' + ev.end_time.slice(0,5) : ''}`);
     if (ev.location)   meta.push(`📍 ${esc(ev.location)}`);
     if (profile)       meta.push(`— ${esc(profile.name)}`);
     h += `<div class="ev-item">
@@ -1715,8 +1732,14 @@ function esc(s) {
   if (session) { S.session = session; await afterLogin(); }
   else { showScreen('auth'); }
 
-  sb.auth.onAuthStateChange((event) => {
-    if (event === 'SIGNED_OUT') { showScreen('auth'); }
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_OUT') {
+      if (S.channel) sb.removeChannel(S.channel);
+      Object.assign(S, { session: null, profile: null, profiles: {}, events: [], channel: null });
+      showScreen('auth');
+    } else if (event === 'TOKEN_REFRESHED' && session) {
+      S.session = session;
+    }
   });
 })();
 </script>
