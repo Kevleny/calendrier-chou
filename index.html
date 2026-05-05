@@ -362,10 +362,11 @@
     .next-loc   { font-size: 12px; color: var(--text-dim); }
     .countdown  {
       font-family: 'Cormorant Garamond', serif; font-size: 34px;
-      font-weight: 600; line-height: 1; margin-top: 12px;
+      font-weight: 600; line-height: 1.1; margin-top: 12px;
       background: linear-gradient(135deg, var(--caen), #f8d4a0);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
+    .countdown.countdown-word { font-size: 24px; }
     .countdown-lbl { font-size: 11px; color: var(--text-dim); margin-top: 3px; letter-spacing: .06em; }
 
     .user-stat { margin-bottom: 14px; }
@@ -1548,17 +1549,22 @@ function buildStats() {
   let nextH = '';
 
   if (next) {
-    const d        = new Date(next.event_date + 'T12:00:00');
-    const todayStr = ds(now);
-    const diff     = Math.round((d - new Date(todayStr + 'T12:00:00')) / 86400000);
-    const color = S.profiles[next.created_by]?.color || '#e8a87c';
-    const label = diff === 0 ? "Aujourd'hui !" : diff === 1 ? 'Demain' : `J−${diff}`;
+    const d           = new Date(next.event_date + 'T12:00:00');
+    const todayStr    = ds(now);
+    const tmrw        = new Date(now); tmrw.setDate(tmrw.getDate() + 1);
+    const tomorrowStr = ds(tmrw);
+    const diff        = Math.round((d - new Date(todayStr + 'T12:00:00')) / 86400000);
+    const color       = S.profiles[next.created_by]?.color || '#e8a87c';
+    let label, isWord;
+    if      (next.event_date === todayStr)    { label = "Aujourd'hui !"; isWord = true; }
+    else if (next.event_date === tomorrowStr) { label = 'Demain';        isWord = true; }
+    else                                      { label = `J−${diff}`;     isWord = false; }
     nextH = `<div class="next-card" style="border-color:${color}40">
       <div class="next-date">${d.toLocaleDateString('fr-FR', { day:'numeric', month:'long' })}</div>
       <div class="next-title">${esc(next.title)}</div>
       ${next.location ? `<div class="next-loc">📍 ${esc(next.location)}</div>` : ''}
-      <div class="countdown">${label}</div>
-      ${diff > 1 ? '<div class="countdown-lbl">jours restants</div>' : ''}
+      <div class="countdown${isWord ? ' countdown-word' : ''}">${label}</div>
+      ${!isWord && diff > 1 ? '<div class="countdown-lbl">jours restants</div>' : ''}
     </div>`;
   } else {
     nextH = '<div class="empty-msg">Aucun événement à venir.</div>';
