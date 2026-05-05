@@ -1029,6 +1029,7 @@ async function launchApp() {
   renderStats();
   requestNotifPerm();
   checkTodayEvents();
+  initSwipe();
 }
 
 function updateUserBadge() {
@@ -1687,29 +1688,26 @@ function handleTodayClick(e) {
 // ═══════════════════════════════════════════════════════════
 // SWIPE CALENDRIER
 // ═══════════════════════════════════════════════════════════
-(function() {
+function initSwipe() {
+  const el = document.getElementById('calSection');
+  if (!el) return;
   let startX = 0, startY = 0;
-  const THRESHOLD = 50; // px minimum pour valider le swipe
 
-  document.addEventListener('touchstart', e => {
+  el.addEventListener('touchstart', e => {
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
   }, { passive: true });
 
-  document.addEventListener('touchend', e => {
-    if (S.view !== 'calendar') return; // pas actif en vue planning
+  el.addEventListener('touchend', e => {
     if (document.getElementById('modalOv').classList.contains('open')) return;
     if (document.getElementById('drawer').classList.contains('open')) return;
-
     const dx = e.changedTouches[0].clientX - startX;
     const dy = e.changedTouches[0].clientY - startY;
-
-    if (Math.abs(dx) < THRESHOLD) return;       // trop court
-    if (Math.abs(dy) > Math.abs(dx)) return;    // mouvement vertical → scroll
-
+    if (Math.abs(dx) < 50) return;
+    if (Math.abs(dy) > Math.abs(dx)) return;
     changeMonth(dx > 0 ? 1 : -1);
   }, { passive: true });
-})();
+}
 
 function openDrawer()  {
   document.getElementById('drawer').classList.add('open');
