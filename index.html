@@ -1273,6 +1273,14 @@ function goToToday() {
   renderStats();
 }
 
+function goToToday() {
+  const now = new Date();
+  S.year  = now.getFullYear();
+  S.month = now.getMonth();
+  renderCalendar();
+  renderStats();
+}
+
 // ═══════════════════════════════════════════════════════════
 // MODAL
 // ═══════════════════════════════════════════════════════════
@@ -1530,8 +1538,9 @@ function buildStats() {
   let nextH = '';
 
   if (next) {
-    const d     = new Date(next.event_date + 'T12:00:00');
-    const diff  = Math.ceil((d - now) / 86400000);
+    const d        = new Date(next.event_date + 'T12:00:00');
+    const todayStr = ds(now);
+    const diff     = Math.round((d - new Date(todayStr + 'T12:00:00')) / 86400000);
     const color = S.profiles[next.created_by]?.color || '#e8a87c';
     const label = diff === 0 ? "Aujourd'hui !" : diff === 1 ? 'Demain' : `J−${diff}`;
     nextH = `<div class="next-card" style="border-color:${color}40">
