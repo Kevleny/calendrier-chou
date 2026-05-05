@@ -817,19 +817,19 @@
     </aside>
   </div>
 
-</div><!-- #app -->
+  <!-- Bottom nav (mobile) -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="bnav-btn active" id="bnavCal"  onclick="switchView('calendar')">
+      <span class="bnav-icon">📅</span>
+      <span class="bnav-label">Calendrier</span>
+    </button>
+    <button class="bnav-btn" id="bnavPlan" onclick="switchView('planning')">
+      <span class="bnav-icon">📋</span>
+      <span class="bnav-label">Planning</span>
+    </button>
+  </nav>
 
-<!-- ── Bottom nav (mobile) ──────────────────────────────── -->
-<nav class="bottom-nav" id="bottomNav">
-  <button class="bnav-btn active" id="bnavCal"  onclick="switchView('calendar')">
-    <span class="bnav-icon">📅</span>
-    <span class="bnav-label">Calendrier</span>
-  </button>
-  <button class="bnav-btn" id="bnavPlan" onclick="switchView('planning')">
-    <span class="bnav-icon">📋</span>
-    <span class="bnav-label">Planning</span>
-  </button>
-</nav>
+</div><!-- #app -->
 
 <!-- ── Drawer (mobile) ──────────────────────────────────── -->
 <div class="drawer-overlay" id="drawerOv" onclick="closeDrawer()"></div>
