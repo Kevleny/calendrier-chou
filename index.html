@@ -488,7 +488,6 @@
       .month-title { font-size: 26px; }
     }
     @media (max-width: 600px) {
-      /* Plein écran */
       .cal-section {
         padding: 10px 8px;
         display: flex; flex-direction: column;
@@ -497,17 +496,17 @@
       .month-nav { flex-shrink: 0; margin-bottom: 8px; }
       .cal-grid {
         flex: 1; min-height: 0;
-        align-content: stretch;
+        grid-template-rows: auto repeat(6, 1fr);
+        align-items: stretch;
         gap: 3px;
       }
-      .cal-hd { padding: 5px 0 7px; font-size: 10px; }
-      /* Chips cachés, dots visibles */
+      .cal-hd { padding: 4px 0 6px; font-size: 10px; }
       .day-chips { display: none; }
       .day-dots  { display: flex; justify-content: center; width: 100%; }
       .cal-day {
         align-items: center; justify-content: center;
-        min-height: 0; height: 100%;
-        aspect-ratio: unset; padding: 4px 2px;
+        aspect-ratio: unset; min-height: 0; height: 100%;
+        padding: 4px 2px;
       }
       .day-n { text-align: center; margin-bottom: 3px; font-size: 14px; }
     }
@@ -971,8 +970,9 @@ function calDays(y, m) {
   const days = [];
   for (let i = dow - 1; i >= 0; i--) days.push({ date: new Date(y, m, -i), cur: false });
   for (let d = 1; d <= last.getDate(); d++) days.push({ date: new Date(y, m, d), cur: true });
-  const rem = 7 - (days.length % 7);
-  if (rem < 7) for (let d = 1; d <= rem; d++) days.push({ date: new Date(y, m+1, d), cur: false });
+  // Toujours 42 cellules (6 rangées × 7) pour que le grid soit stable
+  let next = 1;
+  while (days.length < 42) days.push({ date: new Date(y, m+1, next++), cur: false });
   return days;
 }
 
