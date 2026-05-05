@@ -289,6 +289,11 @@
     }
     .cal-day:active { transform: translateY(0); }
     .cal-day.other-month { opacity: .2; pointer-events: none; }
+    .cal-day.weekend {
+      background: rgba(180,160,220,.07);
+      border-color: rgba(180,160,220,.18);
+    }
+    .cal-day.weekend .day-n { color: rgba(200,180,240,.85); }
     .cal-day.today {
       background: linear-gradient(145deg, rgba(255,170,94,.2), rgba(255,170,94,.07));
       border-color: rgba(255,170,94,.6);
@@ -1193,10 +1198,13 @@ function renderCalendar() {
     const d = ds(date), evs = evForDate(date);
     const isToday = d === today;
 
+    const dow = date.getDay(); // 0=dim, 6=sam
+    const isWeekend = dow === 0 || dow === 6;
     const cell = document.createElement('div');
     cell.className = 'cal-day' +
       (!cur ? ' other-month' : '') +
       (isToday ? ' today' : '') +
+      (isWeekend && cur ? ' weekend' : '') +
       (evs.length ? ' has-events' : '');
 
     // Chips (desktop) + dots (mobile)
