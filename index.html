@@ -5,24 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="color-scheme" content="dark">
   <title>Notre Calendrier</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     /* ── Reset ─────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:          #050c16;
-      --surface:     #0b1724;
-      --surface-2:   #112030;
-      --surface-3:   #18304a;
-      --border:      rgba(190,175,145,.1);
-      --border-hi:   rgba(190,175,145,.3);
-      --text:        #bfad92;
-      --text-dim:    rgba(190,175,145,.4);
-      --text-bright: #ede0c8;
-      --caen:        #ffaa5e;
-      --rochette:    #3dd9d9;
+      --bg:          #090e0b;
+      --surface:     #0f1a12;
+      --surface-2:   #162019;
+      --surface-3:   #1d2c20;
+      --border:      rgba(180,210,185,.1);
+      --border-hi:   rgba(180,210,185,.28);
+      --text:        #b8d4be;
+      --text-dim:    rgba(180,210,185,.4);
+      --text-bright: #dff0e2;
+      --caen:        #d4a843;
+      --rochette:    #00d4ff;
       --danger:      #e07878;
       --r:           12px;
       --sidebar-w:   310px;
@@ -31,8 +31,9 @@
     body {
       background: var(--bg);
       background-image:
-        radial-gradient(ellipse 60% 50% at 15% 15%, rgba(255,170,94,.06) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 50% at 85% 85%, rgba(61,217,217,.06) 0%, transparent 70%);
+        radial-gradient(ellipse 60% 50% at 10% 10%, rgba(212,168,67,.08) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 50% at 90% 90%, rgba(0,212,255,.07) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 40% at 50% 50%, rgba(22,50,28,.4) 0%, transparent 80%);
       color: var(--text);
       font-family: 'Inter', system-ui, sans-serif;
       font-size: 14px;
@@ -45,8 +46,8 @@
       content: '';
       position: fixed; inset: 0;
       background-image:
-        linear-gradient(rgba(190,175,145,.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(190,175,145,.07) 1px, transparent 1px);
+        linear-gradient(rgba(120,180,130,.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(120,180,130,.06) 1px, transparent 1px);
       background-size: 52px 52px;
       pointer-events: none; z-index: 0;
     }
@@ -73,8 +74,9 @@
 
     .card-logo { text-align: center; margin-bottom: 28px; }
     .card-logo h1 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 30px; color: var(--text-bright); letter-spacing: .06em;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 32px; font-weight: 700; color: var(--text-bright);
+      letter-spacing: .18em; text-transform: uppercase;
     }
     .card-logo p {
       font-size: 11px; color: var(--text-dim);
@@ -195,8 +197,9 @@
     @keyframes pulse { 0%,100% { transform: scale(1); opacity: .3; } 50% { transform: scale(2); opacity: 0; } }
 
     .header-title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 18px; color: var(--text-bright); white-space: nowrap; letter-spacing: .05em;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 18px; font-weight: 700; color: var(--text-bright);
+      white-space: nowrap; letter-spacing: .18em; text-transform: uppercase;
     }
     .header-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
     .user-badge {
