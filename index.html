@@ -183,17 +183,18 @@
       border-radius: 1px;
     }
     .hmarker {
-      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-      position: relative;
+      font-size: 13px; line-height: 1; flex-shrink: 0;
+      position: relative; display: flex; align-items: center;
+      animation: heartbeat 2s ease-in-out infinite;
     }
-    .hmarker::after {
-      content: ''; position: absolute; inset: -3px; border-radius: 50%;
-      opacity: .3; animation: pulse 2s ease-in-out infinite;
+    .hmarker.caen     { filter: drop-shadow(0 0 5px var(--caen))    drop-shadow(0 0 10px var(--caen)); }
+    .hmarker.rochette { filter: drop-shadow(0 0 5px var(--rochette)) drop-shadow(0 0 10px var(--rochette)); }
+    @keyframes heartbeat {
+      0%,100% { transform: scale(1);    opacity: 1; }
+      15%     { transform: scale(1.35); opacity: 1; }
+      30%     { transform: scale(1);    opacity: .8; }
+      45%     { transform: scale(1.2);  opacity: 1; }
     }
-    .hmarker.caen     { background: var(--caen); box-shadow: 0 0 8px var(--caen); }
-    .hmarker.caen::after { background: var(--caen); }
-    .hmarker.rochette { background: var(--rochette); box-shadow: 0 0 8px var(--rochette); }
-    .hmarker.rochette::after { background: var(--rochette); }
     @keyframes pulse { 0%,100% { transform: scale(1); opacity: .3; } 50% { transform: scale(2); opacity: 0; } }
 
     .header-title {
@@ -768,9 +769,9 @@
     </button>
     <div class="header-route">
       <span class="hcity caen">Caen</span>
-      <div class="hmarker caen"></div>
+      <div class="hmarker caen">♥</div>
       <div class="hline"></div>
-      <div class="hmarker rochette"></div>
+      <div class="hmarker rochette">♥</div>
       <span class="hcity rochette">La Rochette</span>
     </div>
     <span class="header-title">Notre Calendrier</span>
